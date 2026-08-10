@@ -10,14 +10,7 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>
-        Underground Cable AR Practical
-    </title>
-
-    <link
-        rel="stylesheet"
-        href="./style.css"
-    >
+    <title>MindAR Cable Test</title>
 
     <script type="importmap">
     {
@@ -34,34 +27,193 @@
     }
     </script>
 
+    <style>
+
+        body {
+            margin: 0;
+        }
+
+        #container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #control {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 10;
+        }
+
+        button {
+            padding: 12px 20px;
+            font-size: 16px;
+        }
+
+    </style>
+
 </head>
 
 
 <body>
 
-    <div id="ui">
-
-        <div class="title">
-            Underground Cable Phase Identifier
-        </div>
-
-        <div id="status">
-            Press Start AR
-        </div>
+    <div id="control">
 
         <button id="startButton">
-            START AR
+            START
+        </button>
+
+        <button id="stopButton">
+            STOP
         </button>
 
     </div>
 
 
-    <div id="ar-container"></div>
+    <div id="container"></div>
 
 
-    <script
-        type="module"
-        src="./main.js?v=2">
+    <script type="module">
+
+        import * as THREE from "three";
+
+        import {
+            MindARThree
+        } from "mindar-image-three";
+
+
+        const mindarThree =
+            new MindARThree({
+
+                container:
+                    document.querySelector(
+                        "#container"
+                    ),
+
+                imageTargetSrc:
+                    "./targets/cable-end-a.mind"
+
+            });
+
+
+        const {
+            renderer,
+            scene,
+            camera
+        } = mindarThree;
+
+
+        const anchor =
+            mindarThree.addAnchor(0);
+
+
+        // Simple cyan rectangle for tracking test
+
+        const geometry =
+            new THREE.PlaneGeometry(
+                1,
+                0.65
+            );
+
+
+        const material =
+            new THREE.MeshBasicMaterial({
+
+                color: 0x00ffff,
+
+                transparent: true,
+
+                opacity: 0.6,
+
+                side: THREE.DoubleSide
+
+            });
+
+
+        const plane =
+            new THREE.Mesh(
+                geometry,
+                material
+            );
+
+
+        anchor.group.add(
+            plane
+        );
+
+
+        const start =
+            async () => {
+
+                console.log(
+                    "Starting MindAR"
+                );
+
+
+                try {
+
+                    await mindarThree.start();
+
+
+                    console.log(
+                        "MindAR started successfully"
+                    );
+
+
+                    renderer.setAnimationLoop(
+                        () => {
+
+                            renderer.render(
+                                scene,
+                                camera
+                            );
+
+                        }
+                    );
+
+                }
+
+                catch (error) {
+
+                    console.error(
+                        "MindAR start failed:",
+                        error
+                    );
+
+                }
+
+            };
+
+
+        document
+            .querySelector(
+                "#startButton"
+            )
+            .addEventListener(
+                "click",
+                start
+            );
+
+
+        document
+            .querySelector(
+                "#stopButton"
+            )
+            .addEventListener(
+                "click",
+                () => {
+
+                    mindarThree.stop();
+
+                    renderer.setAnimationLoop(
+                        null
+                    );
+
+                }
+            );
+
     </script>
 
 </body>
