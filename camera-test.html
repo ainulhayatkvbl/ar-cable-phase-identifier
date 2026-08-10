@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Camera Test</title>
+
+    <style>
+
+        body {
+            margin: 0;
+            background: black;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        button {
+            margin: 20px;
+            padding: 15px 25px;
+            font-size: 18px;
+        }
+
+        video {
+            width: 100%;
+            max-width: 600px;
+        }
+
+        #status {
+            padding: 10px;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+    <button id="start">
+        START CAMERA
+    </button>
+
+    <div id="status">
+        Camera not started
+    </div>
+
+    <video
+        id="video"
+        autoplay
+        playsinline
+        muted>
+    </video>
+
+
+    <script>
+
+        const button =
+            document.getElementById("start");
+
+        const video =
+            document.getElementById("video");
+
+        const status =
+            document.getElementById("status");
+
+
+        button.addEventListener(
+            "click",
+
+            async () => {
+
+                status.textContent =
+                    "Requesting camera...";
+
+                try {
+
+                    const stream =
+                        await navigator.mediaDevices.getUserMedia({
+
+                            audio: false,
+
+                            video: {
+                                facingMode: "environment"
+                            }
+
+                        });
+
+
+                    video.srcObject =
+                        stream;
+
+
+                    status.textContent =
+                        "Camera working ✅";
+
+
+                    button.style.display =
+                        "none";
+
+                }
+
+                catch (error) {
+
+                    console.error(error);
+
+                    status.textContent =
+                        error.name +
+                        ": " +
+                        error.message;
+
+                }
+
+            }
+
+        );
+
+    </script>
+
+</body>
+
+</html>
