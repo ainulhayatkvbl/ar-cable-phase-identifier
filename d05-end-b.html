@@ -21,15 +21,10 @@
         #container { width: 100vw; height: 100vh; position: relative; overflow: hidden; }
 
         #topControl {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            z-index: 5;
+            position: absolute; top: 10px; left: 10px; z-index: 5;
             max-width: calc(100% - 20px);
-            background: rgba(0,0,0,0.82);
-            color: white;
-            padding: 10px;
-            border-radius: 10px;
+            background: rgba(0,0,0,0.82); color: white;
+            padding: 10px; border-radius: 10px;
         }
 
         #setLabel { font-weight: bold; margin-bottom: 5px; }
@@ -37,74 +32,49 @@
         #startButton { padding: 10px 15px; font-weight: bold; }
 
         #meterPanel {
-            position: absolute;
-            bottom: 10px;
-            left: 50%;
+            position: absolute; bottom: 10px; left: 50%;
             transform: translateX(-50%);
-            width: calc(100% - 20px);
-            max-width: 480px;
-            z-index: 5;
-            background: rgba(0,0,0,0.86);
-            color: white;
-            padding: 12px;
-            border-radius: 12px;
+            width: calc(100% - 20px); max-width: 480px; z-index: 5;
+            background: rgba(0,0,0,0.86); color: white;
+            padding: 12px; border-radius: 12px;
         }
 
         #meterTitle { font-weight: bold; margin-bottom: 8px; }
 
         #meterDisplay {
-            background: #b7caa5;
-            color: #111;
-            border: 4px solid #333;
-            border-radius: 7px;
-            padding: 12px;
-            margin-bottom: 10px;
+            background: #b7caa5; color: #111;
+            border: 4px solid #333; border-radius: 7px;
+            padding: 12px; margin-bottom: 10px;
             text-align: right;
             font-family: "Courier New", monospace;
-            font-size: 34px;
-            font-weight: bold;
+            font-size: 34px; font-weight: bold;
         }
 
         .row { display: flex; gap: 6px; margin-bottom: 8px; }
 
         .row button {
-            flex: 1;
-            padding: 11px 5px;
-            border: none;
-            border-radius: 7px;
-            font-weight: bold;
+            flex: 1; padding: 11px 5px;
+            border: none; border-radius: 7px; font-weight: bold;
         }
 
         .measured { opacity: 0.55; }
 
         #recordPanel {
             background: rgba(255,255,255,0.10);
-            border-radius: 8px;
-            padding: 8px;
-            font-size: 13px;
-            line-height: 1.6;
+            border-radius: 8px; padding: 8px;
+            font-size: 13px; line-height: 1.6;
         }
 
         #finishButton {
-            width: 100%;
-            padding: 12px;
-            margin-top: 8px;
-            border: none;
-            border-radius: 8px;
-            background: #289b42;
-            color: white;
-            font-weight: bold;
+            width: 100%; padding: 12px; margin-top: 8px;
+            border: none; border-radius: 8px;
+            background: #289b42; color: white; font-weight: bold;
         }
 
         #restartButton {
-            width: 100%;
-            padding: 10px;
-            margin-top: 6px;
-            border: none;
-            border-radius: 8px;
-            background: #666;
-            color: white;
-            font-weight: bold;
+            width: 100%; padding: 10px; margin-top: 6px;
+            border: none; border-radius: 8px;
+            background: #666; color: white; font-weight: bold;
         }
     </style>
 </head>
@@ -114,24 +84,14 @@
 
     <div id="topControl">
         <div id="setLabel">Cable Set</div>
-
-        <button id="startButton">
-            START AR
-        </button>
-
-        <div id="status">
-            Ready
-        </div>
+        <button id="startButton">START AR</button>
+        <div id="status">Ready</div>
     </div>
 
     <div id="meterPanel">
-        <div id="meterTitle">
-            DIGITAL MULTIMETER — Ω
-        </div>
+        <div id="meterTitle">DIGITAL MULTIMETER — Ω</div>
 
-        <div id="meterDisplay">
-            ----
-        </div>
+        <div id="meterDisplay">----</div>
 
         <div class="row">
             <button class="measureButton" data-core="0">MEASURE CORE 1</button>
@@ -145,28 +105,24 @@
             Core 3: Not measured
         </div>
 
-        <button id="finishButton">
-            COMPLETE MEASUREMENT
-        </button>
-
-        <button id="restartButton">
-            RETURN TO END A
-        </button>
+        <button id="finishButton">COMPLETE MEASUREMENT</button>
+        <button id="restartButton">RETURN TO END A</button>
     </div>
 </div>
 
 <script type="module">
 import * as THREE from "three";
-
-import {
-    MindARThree
-} from "mindar-image-three";
+import { MindARThree } from "mindar-image-three";
 
 import {
     CABLE_SETS,
     getCableSetFromUrl,
     getStorageKey
 } from "./cable-config.js";
+
+// ======================================================
+// Cable set + saved session
+// ======================================================
 
 const cableSet =
     getCableSetFromUrl();
@@ -194,6 +150,10 @@ let session =
     )
     :
     null;
+
+// ======================================================
+// UI
+// ======================================================
 
 const container =
     document.querySelector(
@@ -263,18 +223,55 @@ if (
     );
 }
 
+// ======================================================
+// Measurement state
+// ======================================================
+
 const readings = [
     null,
     null,
     null
 ];
 
-function createHorizontalCylinder(
+let activeCore =
+    null;
+
+// ======================================================
+// Vertical cable geometry
+// ======================================================
+
+const corePositions = [
+    { label: "Core 1", x:  0.060, y:  0.060 },
+    { label: "Core 2", x:  0.060, y: -0.060 },
+    { label: "Core 3", x: -0.060, y:  0.060 },
+    { label: "Neutral",x: -0.060, y: -0.060 }
+];
+
+const CABLE_ORIGIN =
+    new THREE.Vector3(
+        -0.26,
+        0.10,
+        0.02
+    );
+
+const METER_ORIGIN =
+    new THREE.Vector3(
+        0.36,
+        -0.18,
+        0.085
+    );
+
+// ======================================================
+// Helpers
+// ======================================================
+
+function createZCylinder(
     radius,
     length,
     colour,
-    x,
-    metalness = 0
+    z,
+    metalness = 0,
+    roughness = 0.65
 ) {
     const geometry =
         new THREE.CylinderGeometry(
@@ -287,23 +284,23 @@ function createHorizontalCylinder(
     const material =
         new THREE.MeshStandardMaterial({
             color: colour,
-            roughness: 0.65,
+            roughness: roughness,
             metalness: metalness
         });
 
-    const object =
+    const mesh =
         new THREE.Mesh(
             geometry,
             material
         );
 
-    object.rotation.z =
+    mesh.rotation.x =
         Math.PI / 2;
 
-    object.position.x =
-        x;
+    mesh.position.z =
+        z;
 
-    return object;
+    return mesh;
 }
 
 function createTextSprite(
@@ -343,7 +340,7 @@ function createTextSprite(
         foreground;
 
     context.font =
-        "bold 100px Arial";
+        "bold 96px Arial";
 
     context.textAlign =
         "center";
@@ -382,6 +379,71 @@ function createTextSprite(
     return sprite;
 }
 
+function createCurvedLead(
+    start,
+    end,
+    colour,
+    lift = 0.18
+) {
+    const middle =
+        new THREE.Vector3()
+            .addVectors(
+                start,
+                end
+            )
+            .multiplyScalar(
+                0.5
+            );
+
+    middle.z +=
+        lift;
+
+    const curve =
+        new THREE.QuadraticBezierCurve3(
+            start,
+            middle,
+            end
+        );
+
+    const geometry =
+        new THREE.TubeGeometry(
+            curve,
+            32,
+            0.009,
+            10,
+            false
+        );
+
+    const material =
+        new THREE.MeshStandardMaterial({
+            color: colour,
+            roughness: 0.45
+        });
+
+    return new THREE.Mesh(
+        geometry,
+        material
+    );
+}
+
+function pointInAnchorFromGroup(
+    group,
+    localPoint
+) {
+    const world =
+        group.localToWorld(
+            localPoint.clone()
+        );
+
+    return anchor.group.worldToLocal(
+        world
+    );
+}
+
+// ======================================================
+// MindAR
+// ======================================================
+
 const mindarThree =
     new MindARThree({
         container:
@@ -402,11 +464,15 @@ const anchor =
         0
     );
 
+// ======================================================
+// Lights
+// ======================================================
+
 const ambient =
     new THREE.HemisphereLight(
         0xffffff,
         0x444444,
-        2.5
+        2.7
     );
 
 scene.add(
@@ -416,58 +482,86 @@ scene.add(
 const directional =
     new THREE.DirectionalLight(
         0xffffff,
-        2.5
+        2.8
     );
 
 directional.position.set(
     -2,
     3,
-    4
+    5
 );
 
 scene.add(
     directional
 );
 
+// ======================================================
+// Build vertical End B cable
+// ======================================================
+
 const cableGroup =
     new THREE.Group();
 
-const cores = [
-    { y: 0.030, z: 0.030 },
-    { y: 0.030, z: -0.030 },
-    { y: -0.030, z: 0.030 },
-    { y: -0.030, z: -0.030 }
-];
+cableGroup.position.copy(
+    CABLE_ORIGIN
+);
 
+// Ground collar.
+const groundRing =
+    new THREE.Mesh(
+        new THREE.TorusGeometry(
+            0.25,
+            0.035,
+            12,
+            40
+        ),
+        new THREE.MeshStandardMaterial({
+            color: 0x4d3c2e,
+            roughness: 1
+        })
+    );
+
+groundRing.position.z =
+    0.025;
+
+cableGroup.add(
+    groundRing
+);
+
+// Outer jacket.
 const outer =
-    createHorizontalCylinder(
-        0.095,
+    createZCylinder(
+        0.19,
         0.48,
         0x111111,
-        0.18
+        0.26,
+        0,
+        0.8
     );
 
 cableGroup.add(
     outer
 );
 
+// Bedding.
 const bedding =
-    createHorizontalCylinder(
-        0.067,
-        0.64,
+    createZCylinder(
+        0.135,
+        0.62,
         0xd9c9a3,
-        0.10
+        0.38
     );
 
 cableGroup.add(
     bedding
 );
 
+// Armour strands.
 const armourCount =
-    24;
+    26;
 
 const armourRadius =
-    0.079;
+    0.158;
 
 for (
     let i = 0;
@@ -485,20 +579,21 @@ for (
         2;
 
     const armour =
-        createHorizontalCylinder(
-            0.005,
-            0.56,
+        createZCylinder(
+            0.010,
+            0.36,
             0x888888,
-            0.14,
-            0.85
+            0.50,
+            0.85,
+            0.30
         );
 
-    armour.position.y =
+    armour.position.x =
         Math.cos(angle)
         *
         armourRadius;
 
-    armour.position.z =
+    armour.position.y =
         Math.sin(angle)
         *
         armourRadius;
@@ -508,61 +603,63 @@ for (
     );
 }
 
+// End B phase insulation is neutral grey.
+// Student must identify using measurements, not colour.
 for (
     let i = 0;
-    i < cores.length;
+    i < corePositions.length;
     i++
 ) {
     const core =
-        cores[i];
+        corePositions[i];
 
-    const insulationColour =
-        (
-            i === 3
-            ?
-            0x222222
-            :
-            0x888888
-        );
+    const colour =
+        i === 3
+        ?
+        0x222222
+        :
+        0x888888;
 
     const insulation =
-        createHorizontalCylinder(
-            0.018,
-            0.88,
-            insulationColour,
-            -0.02
+        createZCylinder(
+            0.035,
+            0.82,
+            colour,
+            0.72
         );
+
+    insulation.position.x =
+        core.x;
 
     insulation.position.y =
         core.y;
-
-    insulation.position.z =
-        core.z;
 
     cableGroup.add(
         insulation
     );
 
     const copper =
-        createHorizontalCylinder(
-            0.010,
-            0.10,
+        createZCylinder(
+            0.019,
+            0.16,
             0xb87333,
-            -0.51,
-            0.8
+            1.21,
+            0.75,
+            0.30
         );
+
+    copper.position.x =
+        core.x;
 
     copper.position.y =
         core.y;
-
-    copper.position.z =
-        core.z;
 
     cableGroup.add(
         copper
     );
 }
 
+// Core labels.
 for (
     let i = 0;
     i < 3;
@@ -575,16 +672,14 @@ for (
             (
                 i + 1
             ),
-            0.16,
-            0.045
+            0.18,
+            0.048
         );
 
     label.position.set(
-        -0.60,
-        cores[i].y,
-        0.08
-        +
-        cores[i].z
+        corePositions[i].x,
+        corePositions[i].y - 0.12,
+        1.30
     );
 
     cableGroup.add(
@@ -592,18 +687,271 @@ for (
     );
 }
 
-cableGroup.position.set(
-    0,
-    0,
-    0.12
-);
-
-cableGroup.rotation.z =
-    0.10;
-
 anchor.group.add(
     cableGroup
 );
+
+// ======================================================
+// Build separate 3D multimeter
+// ======================================================
+
+const meterGroup =
+    new THREE.Group();
+
+meterGroup.position.copy(
+    METER_ORIGIN
+);
+
+// Meter body.
+const meterBody =
+    new THREE.Mesh(
+        new THREE.BoxGeometry(
+            0.34,
+            0.46,
+            0.10
+        ),
+        new THREE.MeshStandardMaterial({
+            color: 0x2c2c2c,
+            roughness: 0.75
+        })
+    );
+
+meterGroup.add(
+    meterBody
+);
+
+// Yellow protective outer rim.
+const meterRim =
+    new THREE.Mesh(
+        new THREE.BoxGeometry(
+            0.38,
+            0.50,
+            0.075
+        ),
+        new THREE.MeshStandardMaterial({
+            color: 0xd4a900,
+            roughness: 0.65
+        })
+    );
+
+meterRim.position.z =
+    -0.020;
+
+meterGroup.add(
+    meterRim
+);
+
+// Bring main body visually forward.
+meterBody.position.z =
+    0.015;
+
+// Display.
+const display =
+    new THREE.Mesh(
+        new THREE.BoxGeometry(
+            0.24,
+            0.10,
+            0.015
+        ),
+        new THREE.MeshStandardMaterial({
+            color: 0xb7caa5,
+            roughness: 0.35
+        })
+    );
+
+display.position.set(
+    0,
+    0.115,
+    0.075
+);
+
+meterGroup.add(
+    display
+);
+
+const displayText =
+    createTextSprite(
+        "Ω",
+        0.12,
+        0.05,
+        "#b7caa5",
+        "#111111"
+    );
+
+displayText.position.set(
+    0,
+    0.115,
+    0.087
+);
+
+meterGroup.add(
+    displayText
+);
+
+// Rotary dial.
+const dial =
+    createZCylinder(
+        0.060,
+        0.025,
+        0x111111,
+        0.075,
+        0,
+        0.4
+    );
+
+dial.position.y =
+    -0.035;
+
+meterGroup.add(
+    dial
+);
+
+// Black and red jacks.
+const blackJack =
+    createZCylinder(
+        0.020,
+        0.028,
+        0x111111,
+        0.075
+    );
+
+blackJack.position.set(
+    -0.065,
+    -0.165,
+    0.075
+);
+
+meterGroup.add(
+    blackJack
+);
+
+const redJack =
+    createZCylinder(
+        0.020,
+        0.028,
+        0xcc2222,
+        0.075
+    );
+
+redJack.position.set(
+    0.065,
+    -0.165,
+    0.075
+);
+
+meterGroup.add(
+    redJack
+);
+
+anchor.group.add(
+    meterGroup
+);
+
+// ======================================================
+// Probe lead locations
+// ======================================================
+
+function getCoreTipAnchorPoint(
+    coreIndex
+) {
+    const core =
+        corePositions[
+            coreIndex
+        ];
+
+    return pointInAnchorFromGroup(
+        cableGroup,
+        new THREE.Vector3(
+            core.x,
+            core.y,
+            1.30
+        )
+    );
+}
+
+function getArmourAnchorPoint() {
+    return pointInAnchorFromGroup(
+        cableGroup,
+        new THREE.Vector3(
+            0.158,
+            0,
+            0.63
+        )
+    );
+}
+
+function getMeterJackAnchorPoint(
+    isRed
+) {
+    return pointInAnchorFromGroup(
+        meterGroup,
+        new THREE.Vector3(
+            isRed ? 0.065 : -0.065,
+            -0.165,
+            0.09
+        )
+    );
+}
+
+// ======================================================
+// Black lead is permanently connected to armour.
+// ======================================================
+
+const blackLead =
+    createCurvedLead(
+        getMeterJackAnchorPoint(
+            false
+        ),
+        getArmourAnchorPoint(),
+        0x111111,
+        0.20
+    );
+
+anchor.group.add(
+    blackLead
+);
+
+// Red lead changes destination each time a core is measured.
+let redLead =
+    null;
+
+function connectRedProbeToCore(
+    coreIndex
+) {
+    if (
+        redLead
+    ) {
+        anchor.group.remove(
+            redLead
+        );
+
+        redLead.geometry.dispose();
+        redLead.material.dispose();
+
+        redLead =
+            null;
+    }
+
+    redLead =
+        createCurvedLead(
+            getMeterJackAnchorPoint(
+                true
+            ),
+            getCoreTipAnchorPoint(
+                coreIndex
+            ),
+            0xcc2222,
+            0.26
+        );
+
+    anchor.group.add(
+        redLead
+    );
+}
+
+// ======================================================
+// Tracking
+// ======================================================
 
 anchor.onTargetFound =
     () => {
@@ -618,6 +966,10 @@ anchor.onTargetLost =
         statusText.textContent =
             "Point camera at Cable End B tracking sheet";
     };
+
+// ======================================================
+// Measurement logic
+// ======================================================
 
 function getReading(
     coreIndex
@@ -641,7 +993,6 @@ function getReading(
 
 function updateRecordPanel() {
     recordPanel.innerHTML =
-
         "Core 1: "
         +
         (
@@ -649,9 +1000,7 @@ function updateRecordPanel() {
             ??
             "Not measured"
         )
-
         +
-
         "<br>Core 2: "
         +
         (
@@ -659,9 +1008,7 @@ function updateRecordPanel() {
             ??
             "Not measured"
         )
-
         +
-
         "<br>Core 3: "
         +
         (
@@ -670,6 +1017,10 @@ function updateRecordPanel() {
             "Not measured"
         );
 }
+
+// ======================================================
+// Start AR
+// ======================================================
 
 startButton.addEventListener(
     "click",
@@ -715,6 +1066,10 @@ startButton.addEventListener(
     }
 );
 
+// ======================================================
+// Measure core
+// ======================================================
+
 measureButtons.forEach(
     button => {
         button.addEventListener(
@@ -730,6 +1085,14 @@ measureButtons.forEach(
                     Number(
                         button.dataset.core
                     );
+
+                activeCore =
+                    coreIndex;
+
+                // Visually move the red probe lead.
+                connectRedProbeToCore(
+                    coreIndex
+                );
 
                 const reading =
                     getReading(
@@ -749,19 +1112,21 @@ measureButtons.forEach(
                 );
 
                 statusText.textContent =
-                    "Core "
+                    "Red probe connected to Core "
                     +
                     (
                         coreIndex + 1
-                    )
-                    +
-                    " measured";
+                    );
 
                 updateRecordPanel();
             }
         );
     }
 );
+
+// ======================================================
+// Complete measurement
+// ======================================================
 
 finishButton.addEventListener(
     "click",
@@ -809,6 +1174,10 @@ finishButton.addEventListener(
         }
     }
 );
+
+// ======================================================
+// Return to End A
+// ======================================================
 
 restartButton.addEventListener(
     "click",

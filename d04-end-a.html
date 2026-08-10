@@ -21,14 +21,9 @@
         #container { width: 100vw; height: 100vh; position: relative; overflow: hidden; }
 
         #topControl {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            z-index: 5;
-            background: rgba(0,0,0,0.80);
-            color: white;
-            padding: 10px;
-            border-radius: 10px;
+            position: absolute; top: 10px; left: 10px; z-index: 5;
+            background: rgba(0,0,0,0.80); color: white;
+            padding: 10px; border-radius: 10px;
             max-width: calc(100% - 20px);
         }
 
@@ -37,63 +32,42 @@
         #status { margin-top: 6px; font-size: 13px; }
 
         #practicalPanel {
-            position: absolute;
-            bottom: 10px;
-            left: 50%;
+            position: absolute; bottom: 10px; left: 50%;
             transform: translateX(-50%);
-            width: calc(100% - 20px);
-            max-width: 480px;
-            z-index: 5;
-            background: rgba(0,0,0,0.84);
-            color: white;
-            padding: 12px;
-            border-radius: 12px;
+            width: calc(100% - 20px); max-width: 480px; z-index: 5;
+            background: rgba(0,0,0,0.84); color: white;
+            padding: 12px; border-radius: 12px;
         }
 
         .title { font-weight: bold; margin-bottom: 8px; font-size: 13px; }
         .row { display: flex; gap: 6px; margin-bottom: 8px; }
         .row button {
-            flex: 1;
-            padding: 10px 5px;
-            border: none;
-            border-radius: 7px;
-            font-weight: bold;
+            flex: 1; padding: 10px 5px; border: none;
+            border-radius: 7px; font-weight: bold;
         }
 
         .selected { outline: 3px solid white; }
         .used { opacity: 0.35; }
 
         #neutralButton {
-            width: 100%;
-            padding: 10px;
-            margin-top: 4px;
-            margin-bottom: 8px;
-            border: none;
-            border-radius: 7px;
-            font-weight: bold;
+            width: 100%; padding: 10px;
+            margin-top: 4px; margin-bottom: 8px;
+            border: none; border-radius: 7px; font-weight: bold;
         }
 
         #summary {
             background: rgba(255,255,255,0.12);
-            border-radius: 7px;
-            padding: 8px;
-            font-size: 13px;
-            line-height: 1.5;
+            border-radius: 7px; padding: 8px;
+            font-size: 13px; line-height: 1.5;
         }
 
         #resetButton { background: #777; color: white; }
         #confirmButton { background: #289b42; color: white; }
 
         #proceedButton {
-            display: none;
-            width: 100%;
-            padding: 12px;
-            margin-top: 8px;
-            border: none;
-            border-radius: 8px;
-            background: #e0a400;
-            color: #111;
-            font-weight: bold;
+            display: none; width: 100%; padding: 12px; margin-top: 8px;
+            border: none; border-radius: 8px;
+            background: #e0a400; color: #111; font-weight: bold;
         }
     </style>
 </head>
@@ -103,21 +77,13 @@
 
     <div id="topControl">
         <div id="setLabel">Cable Set</div>
-
-        <button id="startButton">
-            START AR
-        </button>
-
-        <div id="status">
-            AR not started
-        </div>
+        <button id="startButton">START AR</button>
+        <div id="status">AR not started</div>
     </div>
 
     <div id="practicalPanel">
 
-        <div class="title">
-            STEP 1 — Select Resistance Box Terminal
-        </div>
+        <div class="title">STEP 1 — Select Resistance Box Terminal</div>
 
         <div class="row">
             <button class="resistor" data-ohms="100">100 Ω</button>
@@ -125,9 +91,7 @@
             <button class="resistor" data-ohms="330">330 Ω</button>
         </div>
 
-        <div class="title">
-            STEP 2 — Select Cable Core
-        </div>
+        <div class="title">STEP 2 — Select Cable Core</div>
 
         <div class="row">
             <button class="coreButton" data-core="0">CORE 1</button>
@@ -135,9 +99,7 @@
             <button class="coreButton" data-core="2">CORE 3</button>
         </div>
 
-        <button id="neutralButton">
-            CONNECT NEUTRAL → ARMOUR
-        </button>
+        <button id="neutralButton">CONNECT NEUTRAL → ARMOUR</button>
 
         <div id="summary">
             Core 1: Not connected<br>
@@ -151,18 +113,13 @@
             <button id="confirmButton">CONFIRM END A</button>
         </div>
 
-        <button id="proceedButton">
-            PROCEED TO END B
-        </button>
+        <button id="proceedButton">PROCEED TO END B</button>
     </div>
 </div>
 
 <script type="module">
 import * as THREE from "three";
-
-import {
-    MindARThree
-} from "mindar-image-three";
+import { MindARThree } from "mindar-image-three";
 
 import {
     CABLE_SETS,
@@ -170,15 +127,16 @@ import {
     getStorageKey
 } from "./cable-config.js";
 
+// ======================================================
+// Cable set
+// ======================================================
+
 const cableSet = getCableSetFromUrl();
 const cableConfig = CABLE_SETS[cableSet];
 
-let mindarThree = null;
-let renderer = null;
-let scene = null;
-let camera = null;
-let anchor = null;
-let cableGroup = null;
+// ======================================================
+// UI
+// ======================================================
 
 const startButton = document.querySelector("#startButton");
 const statusText = document.querySelector("#status");
@@ -193,6 +151,10 @@ const proceedButton = document.querySelector("#proceedButton");
 
 setLabel.textContent = cableConfig.label + " — END A";
 
+// ======================================================
+// Practical state
+// ======================================================
+
 let selectedResistor = null;
 
 const assignments = [
@@ -203,53 +165,68 @@ const assignments = [
 
 let neutralConnected = false;
 
-const visualConnections = [];
+const connectionVisuals = [];
 let neutralVisual = null;
 
-const cores = [
-    {
-        label: "Core 1",
-        y: 0.030,
-        z: 0.030,
-        color: 0xcc2222
-    },
+// ======================================================
+// MindAR
+// ======================================================
 
-    {
-        label: "Core 2",
-        y: 0.030,
-        z: -0.030,
-        color: 0xe0c000
-    },
+let mindarThree = null;
+let renderer = null;
+let scene = null;
+let camera = null;
+let anchor = null;
 
-    {
-        label: "Core 3",
-        y: -0.030,
-        z: 0.030,
-        color: 0x2255cc
-    },
+// Scene groups are siblings so the vertical cable can be
+// positioned independently from the resistance box.
+let cableGroup = null;
+let boxGroup = null;
 
-    {
-        label: "Neutral",
-        y: -0.030,
-        z: -0.030,
-        color: 0x222222
-    }
+// ======================================================
+// Geometry constants
+// Cable is approximately 2x the previous visual size.
+// Marker plane = "ground"; +Z = coming out of the ground.
+// ======================================================
+
+const corePositions = [
+    { label: "Core 1", x:  0.060, y:  0.060, color: 0xcc2222 },
+    { label: "Core 2", x:  0.060, y: -0.060, color: 0xe0c000 },
+    { label: "Core 3", x: -0.060, y:  0.060, color: 0x2255cc },
+    { label: "Neutral",x: -0.060, y: -0.060, color: 0x222222 }
 ];
 
-const RESISTANCE_BOX_Y_OFFSET = -0.25;
+// Cable location relative to marker.
+const CABLE_ORIGIN = new THREE.Vector3(
+    -0.25,
+    0.08,
+    0.02
+);
 
-const terminalPositions = {
-    100: new THREE.Vector3(-0.38, -0.22, 0.105),
-    220: new THREE.Vector3(-0.20, -0.22, 0.105),
-    330: new THREE.Vector3(-0.02, -0.22, 0.105)
+// Resistance box is well separated from the cable.
+const BOX_ORIGIN = new THREE.Vector3(
+    0.34,
+    -0.20,
+    0.055
+);
+
+const terminalLocalPositions = {
+    100: new THREE.Vector3(-0.18, 0.00, 0.105),
+    220: new THREE.Vector3( 0.00, 0.00, 0.105),
+    330: new THREE.Vector3( 0.18, 0.00, 0.105)
 };
 
-function createCylinder(
+// ======================================================
+// Helpers
+// ======================================================
+
+function createZCylinder(
     radius,
     length,
     colour,
-    x,
-    metalness = 0
+    z,
+    metalness = 0,
+    roughness = 0.65
 ) {
     const geometry =
         new THREE.CylinderGeometry(
@@ -262,77 +239,53 @@ function createCylinder(
     const material =
         new THREE.MeshStandardMaterial({
             color: colour,
-            roughness: 0.65,
+            roughness: roughness,
             metalness: metalness
         });
 
-    const object =
+    const mesh =
         new THREE.Mesh(
             geometry,
             material
         );
 
-    object.rotation.z =
-        Math.PI / 2;
+    // Default cylinder axis is Y. Rotate it onto Z.
+    mesh.rotation.x = Math.PI / 2;
+    mesh.position.z = z;
 
-    object.position.x =
-        x;
-
-    return object;
+    return mesh;
 }
 
 function createTextLabel(
     text,
-    width = 0.13,
-    height = 0.035
+    width = 0.18,
+    height = 0.045,
+    background = "#ffffff",
+    foreground = "#111111"
 ) {
-    const labelCanvas =
-        document.createElement(
-            "canvas"
-        );
+    const canvas = document.createElement("canvas");
+    canvas.width = 512;
+    canvas.height = 128;
 
-    labelCanvas.width =
-        512;
+    const context = canvas.getContext("2d");
 
-    labelCanvas.height =
-        128;
+    context.fillStyle = background;
+    context.fillRect(0, 0, canvas.width, canvas.height);
 
-    const context =
-        labelCanvas.getContext(
-            "2d"
-        );
-
-    context.fillStyle =
-        "#ffffff";
-
-    context.fillRect(
-        0,
-        0,
-        labelCanvas.width,
-        labelCanvas.height
-    );
-
-    context.fillStyle =
-        "#111111";
-
-    context.font =
-        "bold 58px Arial";
-
-    context.textAlign =
-        "center";
-
-    context.textBaseline =
-        "middle";
+    context.fillStyle = foreground;
+    context.font = "bold 56px Arial";
+    context.textAlign = "center";
+    context.textBaseline = "middle";
 
     context.fillText(
         text,
-        labelCanvas.width / 2,
-        labelCanvas.height / 2
+        canvas.width / 2,
+        canvas.height / 2
     );
 
     const texture =
         new THREE.CanvasTexture(
-            labelCanvas
+            canvas
         );
 
     const material =
@@ -382,7 +335,7 @@ function createWireBetween(
     const material =
         new THREE.MeshStandardMaterial({
             color: colour,
-            roughness: 0.55
+            roughness: 0.5
         });
 
     const wire =
@@ -412,50 +365,114 @@ function createWireBetween(
             0
         );
 
-    wire.quaternion
-        .setFromUnitVectors(
-            up,
-            direction
-                .clone()
-                .normalize()
-        );
+    wire.quaternion.setFromUnitVectors(
+        up,
+        direction.clone().normalize()
+    );
 
     return wire;
 }
 
-function buildCable() {
+function localToAnchor(
+    group,
+    localPoint
+) {
+    return group.localToWorld(
+        localPoint.clone()
+    );
+}
+
+// Because group.localToWorld returns world coordinates,
+// convert them back to anchor-local coordinates before
+// building connection geometry as children of anchor.group.
+function worldToAnchor(
+    worldPoint
+) {
+    return anchor.group.worldToLocal(
+        worldPoint.clone()
+    );
+}
+
+function pointInAnchorFromGroup(
+    group,
+    localPoint
+) {
+    return worldToAnchor(
+        localToAnchor(
+            group,
+            localPoint
+        )
+    );
+}
+
+// ======================================================
+// Ground + vertical cable
+// ======================================================
+
+function buildVerticalCable() {
     cableGroup =
         new THREE.Group();
 
+    cableGroup.position.copy(
+        CABLE_ORIGIN
+    );
+
+    // Ground collar / hole around cable.
+    const groundRing =
+        new THREE.Mesh(
+            new THREE.TorusGeometry(
+                0.25,
+                0.035,
+                12,
+                40
+            ),
+            new THREE.MeshStandardMaterial({
+                color: 0x4d3c2e,
+                roughness: 1
+            })
+        );
+
+    groundRing.position.z =
+        0.025;
+
+    cableGroup.add(
+        groundRing
+    );
+
+    // Outer jacket: lower visible section.
     const outer =
-        createCylinder(
-            0.095,
+        createZCylinder(
+            0.19,
             0.48,
             0x111111,
-            0.18
+            0.26,
+            0,
+            0.8
         );
 
     cableGroup.add(
         outer
     );
 
+    // Bedding rises slightly above the jacket.
     const bedding =
-        createCylinder(
-            0.067,
-            0.64,
+        createZCylinder(
+            0.135,
+            0.62,
             0xd9c9a3,
-            0.10
+            0.38
         );
 
     cableGroup.add(
         bedding
     );
 
+    // Armour strands around the outside.
     const armourCount =
-        24;
+        26;
 
     const armourRadius =
-        0.079;
+        0.158;
 
     for (
         let i = 0;
@@ -473,20 +490,21 @@ function buildCable() {
             2;
 
         const armour =
-            createCylinder(
-                0.005,
-                0.56,
+            createZCylinder(
+                0.010,
+                0.36,
                 0x888888,
-                0.14,
-                0.85
+                0.50,
+                0.85,
+                0.30
             );
 
-        armour.position.y =
+        armour.position.x =
             Math.cos(angle)
             *
             armourRadius;
 
-        armour.position.z =
+        armour.position.y =
             Math.sin(angle)
             *
             armourRadius;
@@ -496,119 +514,100 @@ function buildCable() {
         );
     }
 
+    // Four insulated cores continue out of the top.
     for (
         const core
-        of cores
+        of corePositions
     ) {
         const insulation =
-            createCylinder(
-                0.018,
-                0.88,
+            createZCylinder(
+                0.035,
+                0.82,
                 core.color,
-                -0.02
+                0.72
             );
+
+        insulation.position.x =
+            core.x;
 
         insulation.position.y =
             core.y;
-
-        insulation.position.z =
-            core.z;
 
         cableGroup.add(
             insulation
         );
 
+        // Exposed copper at the very top.
         const copper =
-            createCylinder(
-                0.010,
-                0.10,
+            createZCylinder(
+                0.019,
+                0.16,
                 0xb87333,
-                -0.51,
-                0.8
+                1.21,
+                0.75,
+                0.3
             );
+
+        copper.position.x =
+            core.x;
 
         copper.position.y =
             core.y;
-
-        copper.position.z =
-            core.z;
 
         cableGroup.add(
             copper
         );
     }
 
-    cableGroup.position.set(
-        0,
-        0,
-        0.12
-    );
-
-    cableGroup.rotation.z =
-        -0.10;
-
     anchor.group.add(
         cableGroup
     );
 }
 
+// ======================================================
+// Resistance box
+// ======================================================
+
 function buildResistanceBox() {
-    const boxGroup =
+    boxGroup =
         new THREE.Group();
 
-    const bodyGeometry =
-        new THREE.BoxGeometry(
-            0.54,
-            0.20,
-            0.08
-        );
-
-    const bodyMaterial =
-        new THREE.MeshStandardMaterial({
-            color: 0x303030,
-            roughness: 0.75
-        });
+    boxGroup.position.copy(
+        BOX_ORIGIN
+    );
 
     const body =
         new THREE.Mesh(
-            bodyGeometry,
-            bodyMaterial
+            new THREE.BoxGeometry(
+                0.62,
+                0.30,
+                0.10
+            ),
+            new THREE.MeshStandardMaterial({
+                color: 0x303030,
+                roughness: 0.75
+            })
         );
-
-    body.position.set(
-        -0.20,
-        -0.22,
-        0.05
-    );
 
     boxGroup.add(
         body
     );
 
-    const panelGeometry =
-        new THREE.BoxGeometry(
-            0.50,
-            0.16,
-            0.012
-        );
-
-    const panelMaterial =
-        new THREE.MeshStandardMaterial({
-            color: 0xe5d7a0,
-            roughness: 0.55
-        });
-
     const panel =
         new THREE.Mesh(
-            panelGeometry,
-            panelMaterial
+            new THREE.BoxGeometry(
+                0.57,
+                0.25,
+                0.018
+            ),
+            new THREE.MeshStandardMaterial({
+                color: 0xe5d7a0,
+                roughness: 0.55
+            })
         );
 
-    panel.position.set(
-        -0.20,
-        -0.22,
-        0.097
-    );
+    panel.position.z =
+        0.060;
 
     boxGroup.add(
         panel
@@ -617,25 +616,19 @@ function buildResistanceBox() {
     const title =
         createTextLabel(
             "RESISTANCE BOX",
-            0.28,
-            0.035
+            0.34,
+            0.055
         );
 
     title.position.set(
-        -0.20,
-        -0.165,
-        0.112
+        0,
+        0.085,
+        0.082
     );
 
     boxGroup.add(
         title
     );
-
-    const terminalValues = [
-        100,
-        220,
-        330
-    ];
 
     const terminalColours = {
         100: 0xdd3333,
@@ -645,96 +638,62 @@ function buildResistanceBox() {
 
     for (
         const value
-        of terminalValues
+        of [100, 220, 330]
     ) {
-        const position =
-            terminalPositions[
+        const pos =
+            terminalLocalPositions[
                 value
             ];
 
-        const baseGeometry =
-            new THREE.CylinderGeometry(
-                0.023,
-                0.023,
-                0.010,
-                20
-            );
-
-        const baseMaterial =
-            new THREE.MeshStandardMaterial({
-                color: 0x111111,
-                roughness: 0.4
-            });
-
         const base =
-            new THREE.Mesh(
-                baseGeometry,
-                baseMaterial
+            createZCylinder(
+                0.030,
+                0.025,
+                0x111111,
+                pos.z - 0.012
             );
 
-        base.rotation.x =
-            Math.PI / 2;
+        base.position.x =
+            pos.x;
 
-        base.position.set(
-            position.x,
-            position.y,
-            0.105
-        );
+        base.position.y =
+            pos.y;
 
         boxGroup.add(
             base
         );
 
-        const terminalGeometry =
-            new THREE.CylinderGeometry(
-                0.014,
-                0.014,
-                0.035,
-                20
+        const post =
+            createZCylinder(
+                0.020,
+                0.055,
+                terminalColours[value],
+                pos.z + 0.018,
+                0.35,
+                0.35
             );
 
-        const terminalMaterial =
-            new THREE.MeshStandardMaterial({
-                color:
-                    terminalColours[
-                        value
-                    ],
-                metalness:
-                    0.35,
-                roughness:
-                    0.35
-            });
+        post.position.x =
+            pos.x;
 
-        const terminal =
-            new THREE.Mesh(
-                terminalGeometry,
-                terminalMaterial
-            );
-
-        terminal.rotation.x =
-            Math.PI / 2;
-
-        terminal.position.set(
-            position.x,
-            position.y,
-            0.122
-        );
+        post.position.y =
+            pos.y;
 
         boxGroup.add(
-            terminal
+            post
         );
 
         const label =
             createTextLabel(
                 value + " Ω",
-                0.10,
-                0.028
+                0.14,
+                0.042
             );
 
         label.position.set(
-            position.x,
-            -0.275,
-            0.113
+            pos.x,
+            -0.085,
+            0.086
         );
 
         boxGroup.add(
@@ -742,90 +701,116 @@ function buildResistanceBox() {
         );
     }
 
-    boxGroup.position.y =
-        RESISTANCE_BOX_Y_OFFSET;
-
-    cableGroup.add(
+    anchor.group.add(
         boxGroup
     );
 }
 
-function showResistor(
-    coreIndex,
-    ohms
+// ======================================================
+// Connection visuals
+// ======================================================
+
+function getCoreTipAnchorPoint(
+    coreIndex
 ) {
     const core =
-        cores[
+        corePositions[
             coreIndex
         ];
 
-    const corePoint =
+    const cableLocalPoint =
         new THREE.Vector3(
-            -0.56,
+            core.x,
             core.y,
-            core.z
+            1.30
+        );
+
+    return pointInAnchorFromGroup(
+        cableGroup,
+        cableLocalPoint
+    );
+}
+
+function getTerminalAnchorPoint(
+    ohms
+) {
+    return pointInAnchorFromGroup(
+        boxGroup,
+        terminalLocalPositions[
+            ohms
+        ]
+    );
+}
+
+function showResistanceConnection(
+    coreIndex,
+    ohms
+) {
+    const corePoint =
+        getCoreTipAnchorPoint(
+            coreIndex
         );
 
     const terminalPoint =
-        terminalPositions[
+        getTerminalAnchorPoint(
             ohms
-        ].clone();
-
-    terminalPoint.y +=
-        RESISTANCE_BOX_Y_OFFSET;
+        );
 
     const wire =
         createWireBetween(
             corePoint,
             terminalPoint,
-            0.005,
+            0.009,
             0xffcc33
         );
 
-    cableGroup.add(
+    anchor.group.add(
         wire
     );
 
-    visualConnections[
+    connectionVisuals[
         coreIndex
     ] =
         wire;
 }
 
 function showNeutralConnection() {
-    const neutral =
-        cores[3];
-
     const neutralPoint =
-        new THREE.Vector3(
-            -0.56,
-            neutral.y,
-            neutral.z
+        getCoreTipAnchorPoint(
+            3
         );
 
+    // A visible armour contact point near the top of
+    // the exposed armour section.
     const armourPoint =
-        new THREE.Vector3(
-            -0.15,
-            -0.09,
-            0
+        pointInAnchorFromGroup(
+            cableGroup,
+            new THREE.Vector3(
+                0.158,
+                0,
+                0.62
+            )
         );
 
     neutralVisual =
         createWireBetween(
             neutralPoint,
             armourPoint,
-            0.005,
+            0.010,
             0x00ff66
         );
 
-    cableGroup.add(
+    anchor.group.add(
         neutralVisual
     );
 }
 
+// ======================================================
+// Summary
+// ======================================================
+
 function updateSummary() {
     summary.innerHTML =
-
         "Core 1: "
         +
         (
@@ -835,9 +820,7 @@ function updateSummary() {
             :
             "Not connected"
         )
-
         +
-
         "<br>Core 2: "
         +
         (
@@ -847,9 +830,7 @@ function updateSummary() {
             :
             "Not connected"
         )
-
         +
-
         "<br>Core 3: "
         +
         (
@@ -859,9 +840,7 @@ function updateSummary() {
             :
             "Not connected"
         )
-
         +
-
         "<br>Neutral → Armour: "
         +
         (
@@ -873,6 +852,10 @@ function updateSummary() {
         );
 }
 
+// ======================================================
+// AR setup
+// ======================================================
+
 function setupAR() {
     mindarThree =
         new MindARThree({
@@ -880,7 +863,6 @@ function setupAR() {
                 document.querySelector(
                     "#container"
                 ),
-
             imageTargetSrc:
                 "./targets/cable-end-a.mind"
         });
@@ -900,7 +882,7 @@ function setupAR() {
         new THREE.HemisphereLight(
             0xffffff,
             0x444444,
-            2.5
+            2.7
         );
 
     scene.add(
@@ -910,20 +892,20 @@ function setupAR() {
     const directional =
         new THREE.DirectionalLight(
             0xffffff,
-            2.5
+            2.8
         );
 
     directional.position.set(
         -2,
         3,
-        4
+        5
     );
 
     scene.add(
         directional
     );
 
-    buildCable();
+    buildVerticalCable();
     buildResistanceBox();
 
     anchor.onTargetFound =
@@ -986,6 +968,10 @@ startButton.addEventListener(
     "click",
     startAR
 );
+
+// ======================================================
+// End A interactions
+// ======================================================
 
 resistorButtons.forEach(
     button => {
@@ -1061,7 +1047,7 @@ coreButtons.forEach(
                 ] =
                     selectedResistor;
 
-                showResistor(
+                showResistanceConnection(
                     coreIndex,
                     selectedResistor
                 );
@@ -1092,7 +1078,7 @@ coreButtons.forEach(
                 statusText.textContent =
                     selectedResistor
                     +
-                    " Ω terminal connected to Core "
+                    " Ω connected to Core "
                     +
                     (
                         coreIndex + 1
@@ -1139,24 +1125,24 @@ resetButton.addEventListener(
     () => {
         for (
             const visual
-            of visualConnections
+            of connectionVisuals
         ) {
             if (
                 visual
             ) {
-                cableGroup.remove(
+                anchor.group.remove(
                     visual
                 );
             }
         }
 
-        visualConnections.length =
+        connectionVisuals.length =
             0;
 
         if (
             neutralVisual
         ) {
-            cableGroup.remove(
+            anchor.group.remove(
                 neutralVisual
             );
 
@@ -1164,14 +1150,9 @@ resetButton.addEventListener(
                 null;
         }
 
-        assignments[0] =
-            null;
-
-        assignments[1] =
-            null;
-
-        assignments[2] =
-            null;
+        assignments[0] = null;
+        assignments[1] = null;
+        assignments[2] = null;
 
         selectedResistor =
             null;
