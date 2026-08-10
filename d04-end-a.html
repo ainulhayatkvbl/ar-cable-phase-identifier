@@ -2,7 +2,6 @@
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
 
     <meta
@@ -11,7 +10,6 @@
     >
 
     <title>D-04 Cable End A</title>
-
 
     <script type="importmap">
     {
@@ -28,7 +26,6 @@
     }
     </script>
 
-
     <style>
 
         * {
@@ -40,7 +37,6 @@
             font-family: Arial, Helvetica, sans-serif;
         }
 
-
         #container {
             width: 100vw;
             height: 100vh;
@@ -50,7 +46,6 @@
             overflow: hidden;
         }
 
-
         #topControl {
             position: absolute;
 
@@ -59,7 +54,7 @@
 
             z-index: 3;
 
-            background: rgba(0, 0, 0, 0.75);
+            background: rgba(0, 0, 0, 0.78);
 
             color: white;
 
@@ -68,11 +63,11 @@
             border-radius: 10px;
         }
 
-
         #topControl button {
             padding: 10px 15px;
-        }
 
+            font-weight: bold;
+        }
 
         #status {
             margin-top: 6px;
@@ -80,9 +75,7 @@
             font-size: 13px;
         }
 
-
         #practicalPanel {
-
             position: absolute;
 
             bottom: 10px;
@@ -91,12 +84,11 @@
             transform: translateX(-50%);
 
             width: calc(100% - 20px);
-
             max-width: 480px;
 
             z-index: 3;
 
-            background: rgba(0, 0, 0, 0.82);
+            background: rgba(0, 0, 0, 0.84);
 
             color: white;
 
@@ -105,13 +97,13 @@
             border-radius: 12px;
         }
 
-
         .title {
             font-weight: bold;
 
             margin-bottom: 8px;
-        }
 
+            font-size: 13px;
+        }
 
         .row {
             display: flex;
@@ -121,9 +113,7 @@
             margin-bottom: 8px;
         }
 
-
         .row button {
-
             flex: 1;
 
             padding: 10px 5px;
@@ -135,19 +125,30 @@
             font-weight: bold;
         }
 
-
         .selected {
             outline: 3px solid white;
         }
-
 
         .used {
             opacity: 0.35;
         }
 
+        #neutralButton {
+            width: 100%;
+
+            padding: 10px;
+
+            margin-top: 4px;
+            margin-bottom: 8px;
+
+            border: none;
+
+            border-radius: 7px;
+
+            font-weight: bold;
+        }
 
         #summary {
-
             background: rgba(255, 255, 255, 0.12);
 
             border-radius: 7px;
@@ -159,32 +160,10 @@
             line-height: 1.5;
         }
 
-
-        #neutralButton {
-            width: 100%;
-
-            padding: 10px;
-
-            margin-top: 8px;
-
-            border: none;
-
-            border-radius: 7px;
-
-            font-weight: bold;
-        }
-
-
-        #actionRow {
-            margin-top: 8px;
-        }
-
-
         #resetButton {
             background: #777;
             color: white;
         }
-
 
         #confirmButton {
             background: #289b42;
@@ -192,15 +171,12 @@
         }
 
     </style>
-
 </head>
 
 
 <body>
 
-
 <div id="container">
-
 
     <div id="topControl">
 
@@ -218,9 +194,8 @@
     <div id="practicalPanel">
 
         <div class="title">
-            STEP 1 — Select Resistor
+            STEP 1 — Select Resistance Box Terminal
         </div>
-
 
         <div class="row">
 
@@ -246,9 +221,8 @@
 
 
         <div class="title">
-            STEP 2 — Select Phase Core
+            STEP 2 — Select Cable Core
         </div>
-
 
         <div class="row">
 
@@ -288,9 +262,7 @@
         </div>
 
 
-        <div
-            id="actionRow"
-            class="row">
+        <div class="row" style="margin-top: 8px;">
 
             <button id="resetButton">
                 RESET
@@ -303,7 +275,6 @@
         </div>
 
     </div>
-
 
 </div>
 
@@ -318,9 +289,14 @@ import {
 
 
 // ======================================================
-// D-04 — SIMPLE STABLE VERSION
+// D-04
+// Cable End A + Resistance Identification Box
 // ======================================================
 
+
+// ======================================================
+// Global AR objects
+// ======================================================
 
 let mindarThree = null;
 
@@ -339,48 +315,40 @@ let cableGroup = null;
 // UI
 // ======================================================
 
-
 const startButton =
     document.querySelector(
         "#startButton"
     );
-
 
 const statusText =
     document.querySelector(
         "#status"
     );
 
-
 const summary =
     document.querySelector(
         "#summary"
     );
-
 
 const resistorButtons =
     document.querySelectorAll(
         ".resistor"
     );
 
-
 const coreButtons =
     document.querySelectorAll(
         ".coreButton"
     );
-
 
 const neutralButton =
     document.querySelector(
         "#neutralButton"
     );
 
-
 const resetButton =
     document.querySelector(
         "#resetButton"
     );
-
 
 const confirmButton =
     document.querySelector(
@@ -392,10 +360,8 @@ const confirmButton =
 // Practical state
 // ======================================================
 
-
 let selectedResistor =
     null;
-
 
 const assignments = [
     null,
@@ -403,40 +369,45 @@ const assignments = [
     null
 ];
 
-
 let neutralConnected =
     false;
 
+const visualConnections =
+    [];
 
-const visualConnections = [];
+let neutralVisual =
+    null;
 
 
 // ======================================================
-// Cable dimensions
+// Cable cores
 // ======================================================
-
 
 const cores = [
 
     {
+        label: "Core 1",
         y: 0.030,
         z: 0.030,
         color: 0xcc2222
     },
 
     {
+        label: "Core 2",
         y: 0.030,
         z: -0.030,
         color: 0xe0c000
     },
 
     {
+        label: "Core 3",
         y: -0.030,
         z: 0.030,
         color: 0x2255cc
     },
 
     {
+        label: "Neutral",
         y: -0.030,
         z: -0.030,
         color: 0x222222
@@ -446,9 +417,35 @@ const cores = [
 
 
 // ======================================================
-// Horizontal cylinder
+// Resistance box terminal locations
 // ======================================================
 
+const terminalPositions = {
+
+    100: new THREE.Vector3(
+        -0.38,
+        -0.22,
+        0.105
+    ),
+
+    220: new THREE.Vector3(
+        -0.20,
+        -0.22,
+        0.105
+    ),
+
+    330: new THREE.Vector3(
+        -0.02,
+        -0.22,
+        0.105
+    )
+
+};
+
+
+// ======================================================
+// Horizontal cylinder helper
+// ======================================================
 
 function createCylinder(
     radius,
@@ -466,7 +463,6 @@ function createCylinder(
             32
         );
 
-
     const material =
         new THREE.MeshStandardMaterial({
 
@@ -478,42 +474,216 @@ function createCylinder(
 
         });
 
-
     const object =
         new THREE.Mesh(
             geometry,
             material
         );
 
-
     object.rotation.z =
         Math.PI / 2;
 
-
     object.position.x =
         x;
-
 
     return object;
 }
 
 
 // ======================================================
-// Create cable model
+// Text sprite helper
 // ======================================================
 
+function createTextLabel(
+    text,
+    width = 0.13,
+    height = 0.035
+) {
+
+    const labelCanvas =
+        document.createElement(
+            "canvas"
+        );
+
+    labelCanvas.width =
+        512;
+
+    labelCanvas.height =
+        128;
+
+
+    const context =
+        labelCanvas.getContext(
+            "2d"
+        );
+
+
+    context.fillStyle =
+        "#ffffff";
+
+    context.fillRect(
+        0,
+        0,
+        labelCanvas.width,
+        labelCanvas.height
+    );
+
+
+    context.fillStyle =
+        "#111111";
+
+    context.font =
+        "bold 58px Arial";
+
+    context.textAlign =
+        "center";
+
+    context.textBaseline =
+        "middle";
+
+
+    context.fillText(
+        text,
+        labelCanvas.width / 2,
+        labelCanvas.height / 2
+    );
+
+
+    const texture =
+        new THREE.CanvasTexture(
+            labelCanvas
+        );
+
+
+    const material =
+        new THREE.SpriteMaterial({
+
+            map: texture,
+
+            transparent: true
+
+        });
+
+
+    const sprite =
+        new THREE.Sprite(
+            material
+        );
+
+
+    sprite.scale.set(
+        width,
+        height,
+        1
+    );
+
+
+    return sprite;
+}
+
+
+// ======================================================
+// Wire helper
+// ======================================================
+
+function createWireBetween(
+    pointA,
+    pointB,
+    radius,
+    colour
+) {
+
+    const direction =
+        new THREE.Vector3()
+            .subVectors(
+                pointB,
+                pointA
+            );
+
+
+    const length =
+        direction.length();
+
+
+    const geometry =
+        new THREE.CylinderGeometry(
+            radius,
+            radius,
+            length,
+            12
+        );
+
+
+    const material =
+        new THREE.MeshStandardMaterial({
+
+            color: colour,
+
+            roughness: 0.55
+
+        });
+
+
+    const wire =
+        new THREE.Mesh(
+            geometry,
+            material
+        );
+
+
+    const midpoint =
+        new THREE.Vector3()
+            .addVectors(
+                pointA,
+                pointB
+            )
+            .multiplyScalar(
+                0.5
+            );
+
+
+    wire.position.copy(
+        midpoint
+    );
+
+
+    const up =
+        new THREE.Vector3(
+            0,
+            1,
+            0
+        );
+
+
+    wire.quaternion
+        .setFromUnitVectors(
+
+            up,
+
+            direction
+                .clone()
+                .normalize()
+
+        );
+
+
+    return wire;
+}
+
+
+// ======================================================
+// Build cable
+// ======================================================
 
 function buildCable() {
-
 
     cableGroup =
         new THREE.Group();
 
 
-    // ----------------------------------------------
+    // --------------------------------------------------
     // Outer sheath
-    // ----------------------------------------------
-
+    // --------------------------------------------------
 
     const outer =
         createCylinder(
@@ -523,16 +693,14 @@ function buildCable() {
             0.18
         );
 
-
     cableGroup.add(
         outer
     );
 
 
-    // ----------------------------------------------
+    // --------------------------------------------------
     // Bedding
-    // ----------------------------------------------
-
+    // --------------------------------------------------
 
     const bedding =
         createCylinder(
@@ -542,20 +710,17 @@ function buildCable() {
             0.10
         );
 
-
     cableGroup.add(
         bedding
     );
 
 
-    // ----------------------------------------------
+    // --------------------------------------------------
     // Armour
-    // ----------------------------------------------
-
+    // --------------------------------------------------
 
     const armourCount =
         24;
-
 
     const armourRadius =
         0.079;
@@ -566,7 +731,6 @@ function buildCable() {
         i < armourCount;
         i++
     ) {
-
 
         const angle =
             (
@@ -608,16 +772,14 @@ function buildCable() {
     }
 
 
-    // ----------------------------------------------
-    // Cores
-    // ----------------------------------------------
-
+    // --------------------------------------------------
+    // Four cores
+    // --------------------------------------------------
 
     for (
         const core
         of cores
     ) {
-
 
         const insulation =
             createCylinder(
@@ -666,6 +828,10 @@ function buildCable() {
     }
 
 
+    // --------------------------------------------------
+    // Position cable on marker
+    // --------------------------------------------------
+
     cableGroup.position.set(
         0,
         0,
@@ -685,87 +851,34 @@ function buildCable() {
 
 
 // ======================================================
-// Add resistor visual
+// Build resistance box
 // ======================================================
 
+function buildResistanceBox() {
 
-function showResistor(
-    coreIndex,
-    ohms
-) {
-
-
-    const group =
+    const boxGroup =
         new THREE.Group();
 
 
-    const core =
-        cores[
-            coreIndex
-        ];
-
-
-    const neutral =
-        cores[3];
-
-
-    // ----------------------------------------------
-    // Resistor position
-    // ----------------------------------------------
-
-
-    const resistorX =
-        -0.67;
-
-
-    const resistorY =
-        core.y;
-
-
-    const resistorZ =
-        core.z;
-
-
-    // ----------------------------------------------
-    // Resistor body
-    // ----------------------------------------------
-
-
-    let colour =
-        0xff8844;
-
-
-    if (
-        ohms === 220
-    ) {
-
-        colour =
-            0xaa55ff;
-
-    }
-
-
-    if (
-        ohms === 330
-    ) {
-
-        colour =
-            0x33bbff;
-
-    }
-
+    // --------------------------------------------------
+    // Main enclosure
+    // --------------------------------------------------
 
     const bodyGeometry =
         new THREE.BoxGeometry(
-            0.10,
-            0.035,
-            0.035
+            0.54,
+            0.20,
+            0.08
         );
 
 
     const bodyMaterial =
         new THREE.MeshStandardMaterial({
-            color: colour
+
+            color: 0x303030,
+
+            roughness: 0.75
+
         });
 
 
@@ -777,133 +890,333 @@ function showResistor(
 
 
     body.position.set(
-        resistorX,
-        resistorY,
-        resistorZ
+        -0.20,
+        -0.22,
+        0.05
     );
 
 
-    group.add(
+    boxGroup.add(
         body
     );
 
 
-    // ----------------------------------------------
-    // Simple connection line
-    // ----------------------------------------------
+    // --------------------------------------------------
+    // Front panel
+    // --------------------------------------------------
 
-
-    const points = [
-
-        new THREE.Vector3(
-            -0.56,
-            core.y,
-            core.z
-        ),
-
-        new THREE.Vector3(
-            resistorX,
-            core.y,
-            core.z
-        ),
-
-        new THREE.Vector3(
-            -0.62,
-            neutral.y,
-            neutral.z
-        )
-
-    ];
-
-
-    const lineGeometry =
-        new THREE.BufferGeometry()
-            .setFromPoints(
-                points
-            );
-
-
-    const lineMaterial =
-        new THREE.LineBasicMaterial({
-            color: 0xffffff
-        });
-
-
-    const line =
-        new THREE.Line(
-            lineGeometry,
-            lineMaterial
+    const panelGeometry =
+        new THREE.BoxGeometry(
+            0.50,
+            0.16,
+            0.012
         );
 
 
-    group.add(
-        line
+    const panelMaterial =
+        new THREE.MeshStandardMaterial({
+
+            color: 0xe5d7a0,
+
+            roughness: 0.55
+
+        });
+
+
+    const panel =
+        new THREE.Mesh(
+            panelGeometry,
+            panelMaterial
+        );
+
+
+    panel.position.set(
+        -0.20,
+        -0.22,
+        0.097
     );
 
 
+    boxGroup.add(
+        panel
+    );
+
+
+    // --------------------------------------------------
+    // Box title
+    // --------------------------------------------------
+
+    const title =
+        createTextLabel(
+            "RESISTANCE BOX",
+            0.28,
+            0.035
+        );
+
+
+    title.position.set(
+        -0.20,
+        -0.165,
+        0.112
+    );
+
+
+    boxGroup.add(
+        title
+    );
+
+
+    // --------------------------------------------------
+    // Terminals
+    // --------------------------------------------------
+
+    const terminalValues = [
+        100,
+        220,
+        330
+    ];
+
+
+    const terminalColours = {
+
+        100: 0xdd3333,
+
+        220: 0x3366dd,
+
+        330: 0x33aa55
+
+    };
+
+
+    for (
+        const value
+        of terminalValues
+    ) {
+
+        const position =
+            terminalPositions[
+                value
+            ];
+
+
+        // Terminal base
+
+        const baseGeometry =
+            new THREE.CylinderGeometry(
+                0.023,
+                0.023,
+                0.010,
+                20
+            );
+
+
+        const baseMaterial =
+            new THREE.MeshStandardMaterial({
+
+                color: 0x111111,
+
+                roughness: 0.4
+
+            });
+
+
+        const base =
+            new THREE.Mesh(
+                baseGeometry,
+                baseMaterial
+            );
+
+
+        base.rotation.x =
+            Math.PI / 2;
+
+
+        base.position.set(
+            position.x,
+            position.y,
+            0.105
+        );
+
+
+        boxGroup.add(
+            base
+        );
+
+
+        // Coloured terminal post
+
+        const terminalGeometry =
+            new THREE.CylinderGeometry(
+                0.014,
+                0.014,
+                0.035,
+                20
+            );
+
+
+        const terminalMaterial =
+            new THREE.MeshStandardMaterial({
+
+                color:
+                    terminalColours[
+                        value
+                    ],
+
+                metalness:
+                    0.35,
+
+                roughness:
+                    0.35
+
+            });
+
+
+        const terminal =
+            new THREE.Mesh(
+                terminalGeometry,
+                terminalMaterial
+            );
+
+
+        terminal.rotation.x =
+            Math.PI / 2;
+
+
+        terminal.position.set(
+            position.x,
+            position.y,
+            0.122
+        );
+
+
+        boxGroup.add(
+            terminal
+        );
+
+
+        // Value label
+
+        const label =
+            createTextLabel(
+                value + " Ω",
+                0.10,
+                0.028
+            );
+
+
+        label.position.set(
+            position.x,
+            -0.275,
+            0.113
+        );
+
+
+        boxGroup.add(
+            label
+        );
+
+    }
+
+
     cableGroup.add(
-        group
+        boxGroup
+    );
+
+}
+
+
+// ======================================================
+// Visual core → box connection
+// ======================================================
+
+function showResistor(
+    coreIndex,
+    ohms
+) {
+
+    const core =
+        cores[
+            coreIndex
+        ];
+
+
+    const corePoint =
+        new THREE.Vector3(
+
+            -0.56,
+
+            core.y,
+
+            core.z
+
+        );
+
+
+    const terminalPoint =
+        terminalPositions[
+            ohms
+        ].clone();
+
+
+    const wire =
+        createWireBetween(
+
+            corePoint,
+
+            terminalPoint,
+
+            0.005,
+
+            0xffcc33
+
+        );
+
+
+    cableGroup.add(
+        wire
     );
 
 
     visualConnections[
         coreIndex
     ] =
-        group;
+        wire;
 
 }
 
 
 // ======================================================
-// Neutral armour visual
+// Neutral → armour
 // ======================================================
 
-
-let neutralVisual =
-    null;
-
-
 function showNeutralConnection() {
-
 
     const neutral =
         cores[3];
 
 
-    const points = [
-
+    const neutralPoint =
         new THREE.Vector3(
             -0.56,
             neutral.y,
             neutral.z
-        ),
+        );
 
+
+    const armourPoint =
         new THREE.Vector3(
             -0.15,
             -0.09,
             0
-        )
-
-    ];
-
-
-    const geometry =
-        new THREE.BufferGeometry()
-            .setFromPoints(
-                points
-            );
-
-
-    const material =
-        new THREE.LineBasicMaterial({
-            color: 0x00ff66
-        });
+        );
 
 
     neutralVisual =
-        new THREE.Line(
-            geometry,
-            material
+        createWireBetween(
+            neutralPoint,
+            armourPoint,
+            0.005,
+            0x00ff66
         );
 
 
@@ -915,69 +1228,46 @@ function showNeutralConnection() {
 
 
 // ======================================================
-// UI summary
+// Summary
 // ======================================================
 
-
 function updateSummary() {
-
 
     summary.innerHTML =
 
         "Core 1: "
         +
         (
-            assignments[0]
-            ??
+            assignments[0] !== null
+            ?
+            assignments[0] + " Ω"
+            :
             "Not connected"
         )
-        +
-        (
-            assignments[0]
-            ?
-            " Ω"
-            :
-            ""
-        )
-
 
         +
 
         "<br>Core 2: "
         +
         (
-            assignments[1]
-            ??
+            assignments[1] !== null
+            ?
+            assignments[1] + " Ω"
+            :
             "Not connected"
         )
-        +
-        (
-            assignments[1]
-            ?
-            " Ω"
-            :
-            ""
-        )
-
 
         +
 
         "<br>Core 3: "
         +
         (
-            assignments[2]
-            ??
+            assignments[2] !== null
+            ?
+            assignments[2] + " Ω"
+            :
             "Not connected"
         )
-        +
-        (
-            assignments[2]
-            ?
-            " Ω"
-            :
-            ""
-        )
-
 
         +
 
@@ -995,12 +1285,10 @@ function updateSummary() {
 
 
 // ======================================================
-// MindAR setup
+// AR setup
 // ======================================================
 
-
 function setupAR() {
-
 
     mindarThree =
         new MindARThree({
@@ -1029,10 +1317,9 @@ function setupAR() {
         );
 
 
-    // ----------------------------------------------
+    // --------------------------------------------------
     // Lighting
-    // ----------------------------------------------
-
+    // --------------------------------------------------
 
     const ambient =
         new THREE.HemisphereLight(
@@ -1068,6 +1355,12 @@ function setupAR() {
 
     buildCable();
 
+    buildResistanceBox();
+
+
+    // --------------------------------------------------
+    // Tracking status
+    // --------------------------------------------------
 
     anchor.onTargetFound =
         () => {
@@ -1093,9 +1386,7 @@ function setupAR() {
 // Start AR
 // ======================================================
 
-
 async function startAR() {
-
 
     if (
         !mindarThree
@@ -1111,7 +1402,6 @@ async function startAR() {
 
 
     try {
-
 
         await mindarThree.start();
 
@@ -1135,13 +1425,11 @@ async function startAR() {
             }
         );
 
-
     }
 
     catch (
         error
     ) {
-
 
         console.error(
             error
@@ -1156,11 +1444,6 @@ async function startAR() {
 }
 
 
-// ======================================================
-// Start button
-// ======================================================
-
-
 startButton.addEventListener(
     "click",
     startAR
@@ -1168,21 +1451,18 @@ startButton.addEventListener(
 
 
 // ======================================================
-// Resistor selection
+// Select resistance terminal
 // ======================================================
-
 
 resistorButtons.forEach(
 
     button => {
-
 
         button.addEventListener(
 
             "click",
 
             () => {
-
 
                 selectedResistor =
                     Number(
@@ -1192,8 +1472,8 @@ resistorButtons.forEach(
 
                 resistorButtons.forEach(
 
-                    b =>
-                        b.classList.remove(
+                    item =>
+                        item.classList.remove(
                             "selected"
                         )
 
@@ -1218,14 +1498,12 @@ resistorButtons.forEach(
 
 
 // ======================================================
-// Core selection
+// Select core
 // ======================================================
-
 
 coreButtons.forEach(
 
     button => {
-
 
         button.addEventListener(
 
@@ -1233,13 +1511,12 @@ coreButtons.forEach(
 
             () => {
 
-
                 if (
                     selectedResistor === null
                 ) {
 
                     statusText.textContent =
-                        "Select a resistor first";
+                        "Select a resistance terminal first";
 
                     return;
 
@@ -1255,13 +1532,11 @@ coreButtons.forEach(
                 if (
                     assignments[
                         coreIndex
-                    ]
-                    !==
-                    null
+                    ] !== null
                 ) {
 
                     statusText.textContent =
-                        "That core already has a resistor";
+                        "That core already has a connection";
 
                     return;
 
@@ -1275,7 +1550,7 @@ coreButtons.forEach(
                 ) {
 
                     statusText.textContent =
-                        "That resistor has already been used";
+                        "That resistance terminal is already used";
 
                     return;
 
@@ -1297,7 +1572,6 @@ coreButtons.forEach(
                 resistorButtons.forEach(
 
                     resistorButton => {
-
 
                         if (
                             Number(
@@ -1330,12 +1604,10 @@ coreButtons.forEach(
                 statusText.textContent =
                     selectedResistor
                     +
-                    " Ω connected to Core "
+                    " Ω terminal connected to Core "
                     +
                     (
-                        coreIndex
-                        +
-                        1
+                        coreIndex + 1
                     );
 
 
@@ -1355,16 +1627,14 @@ coreButtons.forEach(
 
 
 // ======================================================
-// Neutral
+// Neutral → Armour
 // ======================================================
-
 
 neutralButton.addEventListener(
 
     "click",
 
     () => {
-
 
         if (
             neutralConnected
@@ -1390,11 +1660,11 @@ neutralButton.addEventListener(
             "NEUTRAL → ARMOUR CONNECTED";
 
 
-        updateSummary();
-
-
         statusText.textContent =
             "Neutral connected to armour";
+
+
+        updateSummary();
 
     }
 
@@ -1405,19 +1675,16 @@ neutralButton.addEventListener(
 // Reset
 // ======================================================
 
-
 resetButton.addEventListener(
 
     "click",
 
     () => {
 
-
         for (
             const visual
             of visualConnections
         ) {
-
 
             if (
                 visual
@@ -1439,7 +1706,6 @@ resetButton.addEventListener(
         if (
             neutralVisual
         ) {
-
 
             cableGroup.remove(
                 neutralVisual
@@ -1473,7 +1739,6 @@ resetButton.addEventListener(
         resistorButtons.forEach(
 
             button => {
-
 
                 button.disabled =
                     false;
@@ -1512,13 +1777,11 @@ resetButton.addEventListener(
 // Confirm
 // ======================================================
 
-
 confirmButton.addEventListener(
 
     "click",
 
     () => {
-
 
         const completed =
             assignments.every(
@@ -1532,7 +1795,7 @@ confirmButton.addEventListener(
         ) {
 
             statusText.textContent =
-                "Connect all three resistors";
+                "Connect all three phase cores";
 
             return;
 
@@ -1552,14 +1815,19 @@ confirmButton.addEventListener(
 
 
         statusText.textContent =
-            "✓ END A COMPLETE";
+            "✓ END A COMPLETE — READY TO FOLLOW CABLE";
+
+
+        console.log(
+            "End A assignments:",
+            assignments
+        );
 
     }
 
 );
 
 </script>
-
 
 </body>
 
