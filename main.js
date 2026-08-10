@@ -37,7 +37,7 @@ const mindarThree =
         container: container,
 
         imageTargetSrc:
-            "./targets/cable-end-a.mind"
+            "./targets/target.mind"
 
     });
 
