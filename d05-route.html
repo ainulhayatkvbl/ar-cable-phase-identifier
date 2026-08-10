@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>D-05 Cable Route</title>
+
+
+    <script type="importmap">
+    {
+        "imports": {
+
+            "three":
+            "https://unpkg.com/three@0.160.0/build/three.module.js",
+
+            "three/addons/":
+            "https://unpkg.com/three@0.160.0/examples/jsm/",
+
+            "mindar-image-three":
+            "https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.prod.js"
+
+        }
+    }
+    </script>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        #container {
+
+            width: 100vw;
+            height: 100vh;
+
+            position: relative;
+
+            overflow: hidden;
+        }
+
+        #topPanel {
+
+            position: absolute;
+
+            top: 10px;
+            left: 50%;
+
+            transform: translateX(-50%);
+
+            width: calc(100% - 20px);
+            max-width: 500px;
+
+            z-index: 5;
+
+            padding: 12px;
+
+            background: rgba(0, 0, 0, 0.80);
+
+            color: white;
+
+            border-radius: 12px;
+
+            text-align: center;
+        }
+
+        #title {
+
+            font-weight: bold;
+
+            font-size: 17px;
+
+            margin-bottom: 6px;
+        }
+
+        #status {
+
+            font-size: 13px;
+
+            margin-bottom: 8px;
+        }
+
+        #startButton {
+
+            padding: 10px 20px;
+
+            border: none;
+
+            border-radius: 8px;
+
+            font-weight: bold;
+        }
+
+        #bottomPanel {
+
+            position: absolute;
+
+            bottom: 10px;
+            left: 50%;
+
+            transform: translateX(-50%);
+
+            width: calc(100% - 20px);
+            max-width: 500px;
+
+            z-index: 5;
+
+            padding: 12px;
+
+            background: rgba(0, 0, 0, 0.82);
+
+            color: white;
+
+            border-radius: 12px;
+        }
+
+        #instruction {
+
+            font-size: 14px;
+
+            line-height: 1.5;
+        }
+
+        #checkpointResult {
+
+            margin-top: 8px;
+
+            padding: 9px;
+
+            background: rgba(255, 255, 255, 0.10);
+
+            border-radius: 7px;
+
+            font-weight: bold;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div id="container">
+
+
+    <div id="topPanel">
+
+        <div id="title">
+            D-05 — Follow Cable Route
+        </div>
+
+        <div id="status">
+            Ready
+        </div>
+
+        <button id="startButton">
+            START AR
+        </button>
+
+    </div>
+
+
+    <div id="bottomPanel">
+
+        <div id="instruction">
+
+            End A is complete.
+
+            <br>
+
+            Walk along the physical cable route and locate:
+
+            <strong>
+                ROUTE CHECKPOINT 1
+            </strong>
+
+        </div>
+
+
+        <div id="checkpointResult">
+
+            Checkpoint 1:
+            Not detected
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<script type="module">
+
+
+import * as THREE from "three";
+
+
+import {
+    MindARThree
+} from "mindar-image-three";
+
+
+// ======================================================
+// UI
+// ======================================================
+
+
+const container =
+    document.querySelector(
+        "#container"
+    );
+
+
+const statusText =
+    document.querySelector(
+        "#status"
+    );
+
+
+const startButton =
+    document.querySelector(
+        "#startButton"
+    );
+
+
+const checkpointResult =
+    document.querySelector(
+        "#checkpointResult"
+    );
+
+
+// ======================================================
+// Check End A data
+// ======================================================
+
+
+const storedSession =
+    localStorage.getItem(
+        "cablePhaseSession"
+    );
+
+
+if (!storedSession) {
+
+    statusText.textContent =
+        "Complete Cable End A first";
+
+
+    startButton.disabled =
+        true;
+
+}
+
+
+let session =
+    storedSession
+    ?
+    JSON.parse(
+        storedSession
+    )
+    :
+    null;
+
+
+// ======================================================
+// MindAR
+// ======================================================
+
+
+const mindarThree =
+    new MindARThree({
+
+        container: container,
+
+        imageTargetSrc:
+            "./targets/route-checkpoint-1.mind"
+
+    });
+
+
+const {
+    renderer,
+    scene,
+    camera
+} = mindarThree;
+
+
+const anchor =
+    mindarThree.addAnchor(
+        0
+    );
+
+
+// ======================================================
+// Lighting
+// ======================================================
+
+
+const hemisphere =
+    new THREE.HemisphereLight(
+
+        0xffffff,
+
+        0x444444,
+
+        2.5
+
+    );
+
+
+scene.add(
+    hemisphere
+);
+
+
+const directional =
+    new THREE.DirectionalLight(
+
+        0xffffff,
+
+        2.5
+
+    );
+
+
+directional.position.set(
+    -2,
+    3,
+    4
+);
+
+
+scene.add(
+    directional
+);
+
+
+// ======================================================
+// Route AR group
+// ======================================================
+
+
+const routeGroup =
+    new THREE.Group();
+
+
+anchor.group.add(
+    routeGroup
+);
+
+
+// ======================================================
+// Cable section
+// ======================================================
+
+
+const cableGeometry =
+    new THREE.CylinderGeometry(
+
+        0.040,
+
+        0.040,
+
+        0.80,
+
+        32
+
+    );
+
+
+const cableMaterial =
+    new THREE.MeshStandardMaterial({
+
+        color:
+            0x111111,
+
+        roughness:
+            0.75
+
+    });
+
+
+const cable =
+    new THREE.Mesh(
+
+        cableGeometry,
+
+        cableMaterial
+
+    );
+
+
+// Cylinder normally points vertically.
+// Rotate it so it follows left → right.
+
+cable.rotation.z =
+    Math.PI / 2;
+
+
+cable.position.set(
+
+    0,
+
+    -0.10,
+
+    0.08
+
+);
+
+
+routeGroup.add(
+    cable
+);
+
+
+// ======================================================
+// Armour rings
+// Gives cable a little more visual detail
+// ======================================================
+
+
+for (
+    let i = -3;
+    i <= 3;
+    i++
+) {
+
+
+    const ringGeometry =
+        new THREE.TorusGeometry(
+
+            0.043,
+
+            0.004,
+
+            8,
+
+            24
+
+        );
+
+
+    const ringMaterial =
+        new THREE.MeshStandardMaterial({
+
+            color:
+                0x888888,
+
+            metalness:
+                0.8,
+
+            roughness:
+                0.35
+
+        });
+
+
+    const ring =
+        new THREE.Mesh(
+
+            ringGeometry,
+
+            ringMaterial
+
+        );
+
+
+    ring.rotation.y =
+        Math.PI / 2;
+
+
+    ring.position.set(
+
+        i * 0.10,
+
+        -0.10,
+
+        0.08
+
+    );
+
+
+    routeGroup.add(
+        ring
+    );
+
+}
+
+
+// ======================================================
+// Direction arrow shaft
+// ======================================================
+
+
+const shaftGeometry =
+    new THREE.CylinderGeometry(
+
+        0.015,
+
+        0.015,
+
+        0.45,
+
+        16
+
+    );
+
+
+const arrowMaterial =
+    new THREE.MeshStandardMaterial({
+
+        color:
+            0xffcc00
+
+    });
+
+
+const shaft =
+    new THREE.Mesh(
+
+        shaftGeometry,
+
+        arrowMaterial
+
+    );
+
+
+shaft.rotation.z =
+    Math.PI / 2;
+
+
+shaft.position.set(
+
+    0,
+
+    0.12,
+
+    0.08
+
+);
+
+
+routeGroup.add(
+    shaft
+);
+
+
+// ======================================================
+// Arrow head
+// ======================================================
+
+
+const arrowHeadGeometry =
+    new THREE.ConeGeometry(
+
+        0.060,
+
+        0.14,
+
+        24
+
+    );
+
+
+const arrowHead =
+    new THREE.Mesh(
+
+        arrowHeadGeometry,
+
+        arrowMaterial
+
+    );
+
+
+arrowHead.rotation.z =
+    -Math.PI / 2;
+
+
+arrowHead.position.set(
+
+    0.28,
+
+    0.12,
+
+    0.08
+
+);
+
+
+routeGroup.add(
+    arrowHead
+);
+
+
+// ======================================================
+// Text label helper
+// ======================================================
+
+
+function createTextLabel(
+    text
+) {
+
+
+    const labelCanvas =
+        document.createElement(
+            "canvas"
+        );
+
+
+    labelCanvas.width =
+        1024;
+
+
+    labelCanvas.height =
+        180;
+
+
+    const context =
+        labelCanvas.getContext(
+            "2d"
+        );
+
+
+    context.fillStyle =
+        "#111111";
+
+
+    context.fillRect(
+
+        0,
+
+        0,
+
+        labelCanvas.width,
+
+        labelCanvas.height
+
+    );
+
+
+    context.fillStyle =
+        "#ffffff";
+
+
+    context.font =
+        "bold 72px Arial";
+
+
+    context.textAlign =
+        "center";
+
+
+    context.textBaseline =
+        "middle";
+
+
+    context.fillText(
+
+        text,
+
+        labelCanvas.width / 2,
+
+        labelCanvas.height / 2
+
+    );
+
+
+    const texture =
+        new THREE.CanvasTexture(
+            labelCanvas
+        );
+
+
+    const material =
+        new THREE.SpriteMaterial({
+
+            map:
+                texture,
+
+            transparent:
+                true
+
+        });
+
+
+    const sprite =
+        new THREE.Sprite(
+            material
+        );
+
+
+    sprite.scale.set(
+
+        0.65,
+
+        0.12,
+
+        1
+
+    );
+
+
+    return sprite;
+}
+
+
+// ======================================================
+// Direction label
+// ======================================================
+
+
+const directionLabel =
+    createTextLabel(
+        "CONTINUE TO END B"
+    );
+
+
+directionLabel.position.set(
+
+    0,
+
+    0.28,
+
+    0.08
+
+);
+
+
+routeGroup.add(
+    directionLabel
+);
+
+
+// ======================================================
+// Checkpoint detection
+// ======================================================
+
+
+anchor.onTargetFound =
+    () => {
+
+
+        statusText.textContent =
+            "✓ ROUTE CHECKPOINT 1 DETECTED";
+
+
+        checkpointResult.innerHTML =
+            "✓ Checkpoint 1 complete<br>"
+            +
+            "Continue following the cable toward End B.";
+
+
+        checkpointResult.style.color =
+            "#66ff88";
+
+
+        // ----------------------------------------------
+        // Save progress without changing resistor data
+        // ----------------------------------------------
+
+
+        if (session) {
+
+
+            session.routeCheckpoint1Completed =
+                true;
+
+
+            localStorage.setItem(
+
+                "cablePhaseSession",
+
+                JSON.stringify(
+                    session
+                )
+
+            );
+
+        }
+
+    };
+
+
+anchor.onTargetLost =
+    () => {
+
+
+        statusText.textContent =
+            "Checkpoint detected — continue toward End B";
+
+    };
+
+
+// ======================================================
+// Start AR
+// ======================================================
+
+
+startButton.addEventListener(
+
+    "click",
+
+    async () => {
+
+
+        try {
+
+
+            statusText.textContent =
+                "Starting camera...";
+
+
+            startButton.disabled =
+                true;
+
+
+            await mindarThree.start();
+
+
+            startButton.style.display =
+                "none";
+
+
+            statusText.textContent =
+                "Find Route Checkpoint 1";
+
+
+            renderer.setAnimationLoop(
+
+                () => {
+
+
+                    renderer.render(
+
+                        scene,
+
+                        camera
+
+                    );
+
+                }
+
+            );
+
+
+        }
+
+        catch (
+            error
+        ) {
+
+
+            console.error(
+                error
+            );
+
+
+            statusText.textContent =
+                "AR could not start";
+
+
+            startButton.disabled =
+                false;
+
+        }
+
+    }
+
+);
+
+
+</script>
+
+
+</body>
+
+</html>
