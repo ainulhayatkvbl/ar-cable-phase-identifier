@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Underground Cable AR Practical
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="./style.css"
+    >
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three":
+            "https://unpkg.com/three@0.160.0/build/three.module.js",
+
+            "three/addons/":
+            "https://unpkg.com/three@0.160.0/examples/jsm/",
+
+            "mindar-image-three":
+            "https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.prod.js"
+        }
+    }
+    </script>
+
+</head>
+
+
+<body>
+
+    <div id="ui">
+
+        <div class="title">
+            Underground Cable Phase Identifier
+        </div>
+
+        <div id="status">
+            Press Start AR
+        </div>
+
+        <button id="startButton">
+            START AR
+        </button>
+
+    </div>
+
+
+    <div id="ar-container"></div>
+
+
+    <script
+        type="module"
+        src="./main.js">
+    </script>
+
+</body>
+
+</html>
