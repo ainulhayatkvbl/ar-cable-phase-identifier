@@ -420,6 +420,9 @@ const cores = [
 // Resistance box terminal locations
 // ======================================================
 
+const RESISTANCE_BOX_Y_OFFSET = -0.18;
+
+
 const terminalPositions = {
 
     100: new THREE.Vector3(
@@ -1117,6 +1120,10 @@ function buildResistanceBox() {
 
     }
 
+    // Move the whole resistance box farther away
+    // from the cable.
+
+    boxGroup.position.y = -0.25;
 
     cableGroup.add(
         boxGroup
@@ -1156,6 +1163,9 @@ function showResistor(
         terminalPositions[
             ohms
         ].clone();
+
+
+    terminalPoint.y -= 0.25;
 
 
     const wire =
