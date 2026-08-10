@@ -1,146 +1,388 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
     <title>D-05 Cable End B</title>
+
 
     <script type="importmap">
     {
         "imports": {
-            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
-            "mindar-image-three": "https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.prod.js"
+            "three":
+            "https://unpkg.com/three@0.160.0/build/three.module.js",
+
+            "three/addons/":
+            "https://unpkg.com/three@0.160.0/examples/jsm/",
+
+            "mindar-image-three":
+            "https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.prod.js"
         }
     }
     </script>
 
+
     <style>
-        * { box-sizing: border-box; }
-        body { margin: 0; font-family: Arial, Helvetica, sans-serif; }
-        #container { width: 100vw; height: 100vh; position: relative; overflow: hidden; }
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+
+        #container {
+
+            width: 100vw;
+            height: 100vh;
+
+            position: relative;
+
+            overflow: hidden;
+        }
+
 
         #topControl {
-            position: absolute; top: 10px; left: 10px; z-index: 5;
+
+            position: absolute;
+
+            top: 10px;
+            left: 10px;
+
+            z-index: 5;
+
             max-width: calc(100% - 20px);
-            background: rgba(0,0,0,0.82); color: white;
-            padding: 10px; border-radius: 10px;
+
+            background: rgba(0, 0, 0, 0.82);
+
+            color: white;
+
+            padding: 10px;
+
+            border-radius: 10px;
         }
 
-        #setLabel { font-weight: bold; margin-bottom: 5px; }
-        #status { margin-top: 6px; font-size: 13px; }
-        #startButton { padding: 10px 15px; font-weight: bold; }
+
+        #setLabel {
+
+            font-weight: bold;
+
+            margin-bottom: 5px;
+        }
+
+
+        #status {
+
+            margin-top: 6px;
+
+            font-size: 13px;
+        }
+
+
+        #startButton {
+
+            padding: 10px 15px;
+
+            font-weight: bold;
+        }
+
 
         #meterPanel {
-            position: absolute; bottom: 10px; left: 50%;
+
+            position: absolute;
+
+            bottom: 10px;
+            left: 50%;
+
             transform: translateX(-50%);
-            width: calc(100% - 20px); max-width: 480px; z-index: 5;
-            background: rgba(0,0,0,0.86); color: white;
-            padding: 12px; border-radius: 12px;
+
+            width: calc(100% - 20px);
+
+            max-width: 500px;
+
+            z-index: 5;
+
+            background: rgba(0, 0, 0, 0.86);
+
+            color: white;
+
+            padding: 12px;
+
+            border-radius: 12px;
         }
 
-        #meterTitle { font-weight: bold; margin-bottom: 8px; }
+
+        #meterTitle {
+
+            font-weight: bold;
+
+            margin-bottom: 8px;
+        }
+
 
         #meterDisplay {
-            background: #b7caa5; color: #111;
-            border: 4px solid #333; border-radius: 7px;
-            padding: 12px; margin-bottom: 10px;
+
+            background: #b7caa5;
+
+            color: #111;
+
+            border: 4px solid #333;
+
+            border-radius: 7px;
+
+            padding: 12px;
+
+            margin-bottom: 10px;
+
             text-align: right;
+
             font-family: "Courier New", monospace;
-            font-size: 34px; font-weight: bold;
+
+            font-size: 34px;
+
+            font-weight: bold;
         }
 
-        .row { display: flex; gap: 6px; margin-bottom: 8px; }
+
+        .row {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(2, 1fr);
+
+            gap: 6px;
+
+            margin-bottom: 8px;
+        }
+
 
         .row button {
-            flex: 1; padding: 11px 5px;
-            border: none; border-radius: 7px; font-weight: bold;
+
+            padding: 11px 5px;
+
+            border: none;
+
+            border-radius: 7px;
+
+            font-weight: bold;
         }
 
-        .measured { opacity: 0.55; }
+
+        .measured {
+
+            opacity: 0.55;
+        }
+
 
         #recordPanel {
-            background: rgba(255,255,255,0.10);
-            border-radius: 8px; padding: 8px;
-            font-size: 13px; line-height: 1.6;
+
+            background: rgba(255, 255, 255, 0.10);
+
+            border-radius: 8px;
+
+            padding: 8px;
+
+            font-size: 13px;
+
+            line-height: 1.6;
         }
+
 
         #finishButton {
-            width: 100%; padding: 12px; margin-top: 8px;
-            border: none; border-radius: 8px;
-            background: #289b42; color: white; font-weight: bold;
+
+            width: 100%;
+
+            padding: 12px;
+
+            margin-top: 8px;
+
+            border: none;
+
+            border-radius: 8px;
+
+            background: #289b42;
+
+            color: white;
+
+            font-weight: bold;
         }
+
 
         #restartButton {
-            width: 100%; padding: 10px; margin-top: 6px;
-            border: none; border-radius: 8px;
-            background: #666; color: white; font-weight: bold;
+
+            width: 100%;
+
+            padding: 10px;
+
+            margin-top: 6px;
+
+            border: none;
+
+            border-radius: 8px;
+
+            background: #666;
+
+            color: white;
+
+            font-weight: bold;
         }
+
     </style>
+
 </head>
 
+
 <body>
+
+
 <div id="container">
 
+
     <div id="topControl">
-        <div id="setLabel">Cable Set</div>
-        <button id="startButton">START AR</button>
-        <div id="status">Ready</div>
+
+        <div id="setLabel">
+            Cable Set
+        </div>
+
+
+        <button id="startButton">
+            START AR
+        </button>
+
+
+        <div id="status">
+            Ready
+        </div>
+
     </div>
+
 
     <div id="meterPanel">
-        <div id="meterTitle">DIGITAL MULTIMETER — Ω</div>
 
-        <div id="meterDisplay">----</div>
+        <div id="meterTitle">
+            DIGITAL MULTIMETER — Ω
+        </div>
+
+
+        <div id="meterDisplay">
+            ----
+        </div>
+
 
         <div class="row">
-            <button class="measureButton" data-core="0">MEASURE CORE 1</button>
-            <button class="measureButton" data-core="1">MEASURE CORE 2</button>
-            <button class="measureButton" data-core="2">MEASURE CORE 3</button>
+
+            <button
+                class="measureButton"
+                data-b-core="0">
+                MEASURE B CORE A
+            </button>
+
+
+            <button
+                class="measureButton"
+                data-b-core="1">
+                MEASURE B CORE B
+            </button>
+
+
+            <button
+                class="measureButton"
+                data-b-core="2">
+                MEASURE B CORE C
+            </button>
+
+
+            <button
+                class="measureButton"
+                data-b-core="3">
+                MEASURE B CORE D
+            </button>
+
         </div>
+
 
         <div id="recordPanel">
-            Core 1: Not measured<br>
-            Core 2: Not measured<br>
-            Core 3: Not measured
+
+            B Core A: Not measured<br>
+            B Core B: Not measured<br>
+            B Core C: Not measured<br>
+            B Core D: Not measured
+
         </div>
 
-        <button id="finishButton">COMPLETE MEASUREMENT</button>
-        <button id="restartButton">RETURN TO END A</button>
+
+        <button id="finishButton">
+            COMPLETE MEASUREMENT
+        </button>
+
+
+        <button id="restartButton">
+            RETURN TO END A
+        </button>
+
     </div>
+
 </div>
 
+
 <script type="module">
+
+
 import * as THREE from "three";
-import { MindARThree } from "mindar-image-three";
+
 
 import {
+    MindARThree
+} from "mindar-image-three";
+
+
+import {
+
     CABLE_SETS,
     getCableSetFromUrl,
     getStorageKey
+
 } from "./cable-config.js";
 
+
 // ======================================================
-// Cable set + saved session
+// Cable set + saved End A data
 // ======================================================
+
 
 const cableSet =
     getCableSetFromUrl();
+
 
 const cableConfig =
     CABLE_SETS[
         cableSet
     ];
 
+
 const storageKey =
     getStorageKey(
         cableSet
     );
 
+
 const storedSession =
     localStorage.getItem(
         storageKey
     );
+
 
 let session =
     storedSession
@@ -151,101 +393,153 @@ let session =
     :
     null;
 
+
 // ======================================================
 // UI
 // ======================================================
+
 
 const container =
     document.querySelector(
         "#container"
     );
 
+
 const startButton =
     document.querySelector(
         "#startButton"
     );
+
 
 const statusText =
     document.querySelector(
         "#status"
     );
 
+
 const setLabel =
     document.querySelector(
         "#setLabel"
     );
+
 
 const meterDisplay =
     document.querySelector(
         "#meterDisplay"
     );
 
+
 const recordPanel =
     document.querySelector(
         "#recordPanel"
     );
+
 
 const measureButtons =
     document.querySelectorAll(
         ".measureButton"
     );
 
+
 const finishButton =
     document.querySelector(
         "#finishButton"
     );
+
 
 const restartButton =
     document.querySelector(
         "#restartButton"
     );
 
+
 setLabel.textContent =
     cableConfig.label
     +
     " — END B";
 
+
 if (
     !session ||
     !session.endACompleted
 ) {
+
     statusText.textContent =
         "Complete this cable's End A first";
+
 
     startButton.disabled =
         true;
 
+
     measureButtons.forEach(
+
         button => {
+
             button.disabled =
                 true;
+
         }
+
     );
+
 }
+
 
 // ======================================================
 // Measurement state
 // ======================================================
 
+
 const readings = [
+    null,
     null,
     null,
     null
 ];
 
-let activeCore =
+
+let activeBCore =
     null;
 
+
 // ======================================================
-// Vertical cable geometry
+// End B physical conductor positions
+//
+// IMPORTANT:
+// These four conductors are deliberately visually
+// identical. A/B/C/D are only position labels at End B.
 // ======================================================
 
-const corePositions = [
-    { label: "Core 1", x:  0.060, y:  0.060 },
-    { label: "Core 2", x:  0.060, y: -0.060 },
-    { label: "Core 3", x: -0.060, y:  0.060 },
-    { label: "Neutral",x: -0.060, y: -0.060 }
+
+const bCorePositions = [
+
+    {
+        label: "B Core A",
+        x: 0.060,
+        y: 0.060
+    },
+
+    {
+        label: "B Core B",
+        x: 0.060,
+        y: -0.060
+    },
+
+    {
+        label: "B Core C",
+        x: -0.060,
+        y: 0.060
+    },
+
+    {
+        label: "B Core D",
+        x: -0.060,
+        y: -0.060
+    }
+
 ];
+
 
 const CABLE_ORIGIN =
     new THREE.Vector3(
@@ -254,6 +548,7 @@ const CABLE_ORIGIN =
         0.02
     );
 
+
 const METER_ORIGIN =
     new THREE.Vector3(
         0.36,
@@ -261,9 +556,11 @@ const METER_ORIGIN =
         0.085
     );
 
+
 // ======================================================
 // Helpers
 // ======================================================
+
 
 function createZCylinder(
     radius,
@@ -273,6 +570,7 @@ function createZCylinder(
     metalness = 0,
     roughness = 0.65
 ) {
+
     const geometry =
         new THREE.CylinderGeometry(
             radius,
@@ -281,12 +579,21 @@ function createZCylinder(
             32
         );
 
+
     const material =
         new THREE.MeshStandardMaterial({
-            color: colour,
-            roughness: roughness,
-            metalness: metalness
+
+            color:
+                colour,
+
+            roughness:
+                roughness,
+
+            metalness:
+                metalness
+
         });
+
 
     const mesh =
         new THREE.Mesh(
@@ -294,14 +601,18 @@ function createZCylinder(
             material
         );
 
+
     mesh.rotation.x =
         Math.PI / 2;
+
 
     mesh.position.z =
         z;
 
+
     return mesh;
 }
+
 
 function createTextSprite(
     text,
@@ -310,24 +621,30 @@ function createTextSprite(
     background = "#111111",
     foreground = "#ffffff"
 ) {
+
     const canvas =
         document.createElement(
             "canvas"
         );
 
+
     canvas.width =
         1024;
 
+
     canvas.height =
         256;
+
 
     const context =
         canvas.getContext(
             "2d"
         );
 
+
     context.fillStyle =
         background;
+
 
     context.fillRect(
         0,
@@ -336,17 +653,22 @@ function createTextSprite(
         canvas.height
     );
 
+
     context.fillStyle =
         foreground;
+
 
     context.font =
         "bold 96px Arial";
 
+
     context.textAlign =
         "center";
 
+
     context.textBaseline =
         "middle";
+
 
     context.fillText(
         text,
@@ -354,21 +676,30 @@ function createTextSprite(
         canvas.height / 2
     );
 
+
     const texture =
         new THREE.CanvasTexture(
             canvas
         );
 
+
     const material =
         new THREE.SpriteMaterial({
-            map: texture,
-            transparent: true
+
+            map:
+                texture,
+
+            transparent:
+                true
+
         });
+
 
     const sprite =
         new THREE.Sprite(
             material
         );
+
 
     sprite.scale.set(
         width,
@@ -376,8 +707,10 @@ function createTextSprite(
         1
     );
 
+
     return sprite;
 }
+
 
 function createCurvedLead(
     start,
@@ -385,6 +718,7 @@ function createCurvedLead(
     colour,
     lift = 0.18
 ) {
+
     const middle =
         new THREE.Vector3()
             .addVectors(
@@ -395,8 +729,10 @@ function createCurvedLead(
                 0.5
             );
 
+
     middle.z +=
         lift;
+
 
     const curve =
         new THREE.QuadraticBezierCurve3(
@@ -404,6 +740,7 @@ function createCurvedLead(
             middle,
             end
         );
+
 
     const geometry =
         new THREE.TubeGeometry(
@@ -414,11 +751,18 @@ function createCurvedLead(
             false
         );
 
+
     const material =
         new THREE.MeshStandardMaterial({
-            color: colour,
-            roughness: 0.45
+
+            color:
+                colour,
+
+            roughness:
+                0.45
+
         });
+
 
     return new THREE.Mesh(
         geometry,
@@ -426,47 +770,60 @@ function createCurvedLead(
     );
 }
 
+
 function pointInAnchorFromGroup(
     group,
     localPoint
 ) {
+
     const world =
         group.localToWorld(
             localPoint.clone()
         );
+
 
     return anchor.group.worldToLocal(
         world
     );
 }
 
+
 // ======================================================
 // MindAR
 // ======================================================
 
+
 const mindarThree =
     new MindARThree({
+
         container:
             container,
 
         imageTargetSrc:
             "./targets/cable-end-b.mind"
+
     });
 
+
 const {
+
     renderer,
     scene,
     camera
+
 } = mindarThree;
+
 
 const anchor =
     mindarThree.addAnchor(
         0
     );
 
+
 // ======================================================
-// Lights
+// Lighting
 // ======================================================
+
 
 const ambient =
     new THREE.HemisphereLight(
@@ -475,9 +832,11 @@ const ambient =
         2.7
     );
 
+
 scene.add(
     ambient
 );
+
 
 const directional =
     new THREE.DirectionalLight(
@@ -485,50 +844,67 @@ const directional =
         2.8
     );
 
+
 directional.position.set(
     -2,
     3,
     5
 );
 
+
 scene.add(
     directional
 );
+
 
 // ======================================================
 // Build vertical End B cable
 // ======================================================
 
+
 const cableGroup =
     new THREE.Group();
+
 
 cableGroup.position.copy(
     CABLE_ORIGIN
 );
 
-// Ground collar.
+
+// Ground collar
+
 const groundRing =
     new THREE.Mesh(
+
         new THREE.TorusGeometry(
             0.25,
             0.035,
             12,
             40
         ),
+
         new THREE.MeshStandardMaterial({
-            color: 0x4d3c2e,
-            roughness: 1
+            color:
+                0x4d3c2e,
+
+            roughness:
+                1
         })
+
     );
+
 
 groundRing.position.z =
     0.025;
+
 
 cableGroup.add(
     groundRing
 );
 
-// Outer jacket.
+
+// Outer jacket
+
 const outer =
     createZCylinder(
         0.19,
@@ -539,11 +915,14 @@ const outer =
         0.8
     );
 
+
 cableGroup.add(
     outer
 );
 
-// Bedding.
+
+// Bedding
+
 const bedding =
     createZCylinder(
         0.135,
@@ -552,22 +931,28 @@ const bedding =
         0.38
     );
 
+
 cableGroup.add(
     bedding
 );
 
-// Armour strands.
+
+// Armour
+
 const armourCount =
     26;
 
+
 const armourRadius =
     0.158;
+
 
 for (
     let i = 0;
     i < armourCount;
     i++
 ) {
+
     const angle =
         (
             i /
@@ -577,6 +962,7 @@ for (
         Math.PI
         *
         2;
+
 
     const armour =
         createZCylinder(
@@ -588,55 +974,66 @@ for (
             0.30
         );
 
+
     armour.position.x =
         Math.cos(angle)
         *
         armourRadius;
+
 
     armour.position.y =
         Math.sin(angle)
         *
         armourRadius;
 
+
     cableGroup.add(
         armour
     );
+
 }
 
-// End B phase insulation is neutral grey.
-// Student must identify using measurements, not colour.
+
+// ======================================================
+// ALL FOUR END B CORES LOOK THE SAME
+// ======================================================
+
+
+const unknownCoreColour =
+    0x777777;
+
+
 for (
     let i = 0;
-    i < corePositions.length;
+    i < bCorePositions.length;
     i++
 ) {
-    const core =
-        corePositions[i];
 
-    const colour =
-        i === 3
-        ?
-        0x222222
-        :
-        0x888888;
+    const core =
+        bCorePositions[i];
+
 
     const insulation =
         createZCylinder(
             0.035,
             0.82,
-            colour,
+            unknownCoreColour,
             0.72
         );
+
 
     insulation.position.x =
         core.x;
 
+
     insulation.position.y =
         core.y;
+
 
     cableGroup.add(
         insulation
     );
+
 
     const copper =
         createZCylinder(
@@ -648,116 +1045,165 @@ for (
             0.30
         );
 
+
     copper.position.x =
         core.x;
+
 
     copper.position.y =
         core.y;
 
+
     cableGroup.add(
         copper
     );
+
 }
 
-// Core labels.
+
+// ======================================================
+// A / B / C / D labels only
+// ======================================================
+
+
 for (
     let i = 0;
-    i < 3;
+    i < bCorePositions.length;
     i++
 ) {
+
     const label =
         createTextSprite(
-            "CORE "
+
+            "B CORE "
             +
             (
-                i + 1
+                ["A", "B", "C", "D"][i]
             ),
-            0.18,
+
+            0.19,
+
             0.048
+
         );
 
+
     label.position.set(
-        corePositions[i].x,
-        corePositions[i].y - 0.12,
+        bCorePositions[i].x,
+        bCorePositions[i].y - 0.12,
         1.30
     );
+
 
     cableGroup.add(
         label
     );
+
 }
+
 
 anchor.group.add(
     cableGroup
 );
 
+
 // ======================================================
-// Build separate 3D multimeter
+// Build separate multimeter
 // ======================================================
+
 
 const meterGroup =
     new THREE.Group();
+
 
 meterGroup.position.copy(
     METER_ORIGIN
 );
 
-// Meter body.
-const meterBody =
-    new THREE.Mesh(
-        new THREE.BoxGeometry(
-            0.34,
-            0.46,
-            0.10
-        ),
-        new THREE.MeshStandardMaterial({
-            color: 0x2c2c2c,
-            roughness: 0.75
-        })
-    );
 
-meterGroup.add(
-    meterBody
-);
+// Yellow rim
 
-// Yellow protective outer rim.
 const meterRim =
     new THREE.Mesh(
+
         new THREE.BoxGeometry(
             0.38,
             0.50,
             0.075
         ),
+
         new THREE.MeshStandardMaterial({
-            color: 0xd4a900,
-            roughness: 0.65
+            color:
+                0xd4a900,
+
+            roughness:
+                0.65
         })
+
     );
+
 
 meterRim.position.z =
     -0.020;
+
 
 meterGroup.add(
     meterRim
 );
 
-// Bring main body visually forward.
+
+// Body
+
+const meterBody =
+    new THREE.Mesh(
+
+        new THREE.BoxGeometry(
+            0.34,
+            0.46,
+            0.10
+        ),
+
+        new THREE.MeshStandardMaterial({
+            color:
+                0x2c2c2c,
+
+            roughness:
+                0.75
+        })
+
+    );
+
+
 meterBody.position.z =
     0.015;
 
-// Display.
+
+meterGroup.add(
+    meterBody
+);
+
+
+// Display
+
 const display =
     new THREE.Mesh(
+
         new THREE.BoxGeometry(
             0.24,
             0.10,
             0.015
         ),
+
         new THREE.MeshStandardMaterial({
-            color: 0xb7caa5,
-            roughness: 0.35
+            color:
+                0xb7caa5,
+
+            roughness:
+                0.35
         })
+
     );
+
 
 display.position.set(
     0,
@@ -765,9 +1211,11 @@ display.position.set(
     0.075
 );
 
+
 meterGroup.add(
     display
 );
+
 
 const displayText =
     createTextSprite(
@@ -778,17 +1226,21 @@ const displayText =
         "#111111"
     );
 
+
 displayText.position.set(
     0,
     0.115,
     0.087
 );
 
+
 meterGroup.add(
     displayText
 );
 
-// Rotary dial.
+
+// Dial
+
 const dial =
     createZCylinder(
         0.060,
@@ -799,14 +1251,18 @@ const dial =
         0.4
     );
 
+
 dial.position.y =
     -0.035;
+
 
 meterGroup.add(
     dial
 );
 
-// Black and red jacks.
+
+// Jacks
+
 const blackJack =
     createZCylinder(
         0.020,
@@ -815,15 +1271,18 @@ const blackJack =
         0.075
     );
 
+
 blackJack.position.set(
     -0.065,
     -0.165,
     0.075
 );
 
+
 meterGroup.add(
     blackJack
 );
+
 
 const redJack =
     createZCylinder(
@@ -833,361 +1292,552 @@ const redJack =
         0.075
     );
 
+
 redJack.position.set(
     0.065,
     -0.165,
     0.075
 );
 
+
 meterGroup.add(
     redJack
 );
+
 
 anchor.group.add(
     meterGroup
 );
 
+
 // ======================================================
-// Probe lead locations
+// Probe locations
 // ======================================================
 
-function getCoreTipAnchorPoint(
-    coreIndex
+
+function getBCoreTipAnchorPoint(
+    bCoreIndex
 ) {
+
     const core =
-        corePositions[
-            coreIndex
+        bCorePositions[
+            bCoreIndex
         ];
 
+
     return pointInAnchorFromGroup(
+
         cableGroup,
+
         new THREE.Vector3(
             core.x,
             core.y,
             1.30
         )
+
     );
 }
 
+
 function getArmourAnchorPoint() {
+
     return pointInAnchorFromGroup(
+
         cableGroup,
+
         new THREE.Vector3(
             0.158,
             0,
             0.63
         )
+
     );
 }
+
 
 function getMeterJackAnchorPoint(
     isRed
 ) {
+
     return pointInAnchorFromGroup(
+
         meterGroup,
+
         new THREE.Vector3(
             isRed ? 0.065 : -0.065,
             -0.165,
             0.09
         )
+
     );
 }
 
+
 // ======================================================
-// Black lead is permanently connected to armour.
+// Black lead permanently connected to armour
 // ======================================================
+
 
 const blackLead =
     createCurvedLead(
+
         getMeterJackAnchorPoint(
             false
         ),
+
         getArmourAnchorPoint(),
+
         0x111111,
+
         0.20
+
     );
+
 
 anchor.group.add(
     blackLead
 );
 
-// Red lead changes destination each time a core is measured.
+
+// ======================================================
+// Red lead moves between B Core A/B/C/D
+// ======================================================
+
+
 let redLead =
     null;
 
-function connectRedProbeToCore(
-    coreIndex
+
+function connectRedProbeToBCore(
+    bCoreIndex
 ) {
+
     if (
         redLead
     ) {
+
         anchor.group.remove(
             redLead
         );
 
+
         redLead.geometry.dispose();
+
+
         redLead.material.dispose();
+
 
         redLead =
             null;
+
     }
+
 
     redLead =
         createCurvedLead(
+
             getMeterJackAnchorPoint(
                 true
             ),
-            getCoreTipAnchorPoint(
-                coreIndex
+
+            getBCoreTipAnchorPoint(
+                bCoreIndex
             ),
+
             0xcc2222,
+
             0.26
+
         );
+
 
     anchor.group.add(
         redLead
     );
+
 }
+
 
 // ======================================================
 // Tracking
 // ======================================================
 
+
 anchor.onTargetFound =
     () => {
+
         statusText.textContent =
             cableConfig.label
             +
             " End B detected";
+
     };
+
 
 anchor.onTargetLost =
     () => {
+
         statusText.textContent =
             "Point camera at Cable End B tracking sheet";
+
     };
 
+
 // ======================================================
-// Measurement logic
+// Hidden electrical mapping
+//
+// cableConfig.endBMap[bCoreIndex] tells us what the
+// conductor really is at End A.
+//
+// Source:
+// 0 = End A Core 1
+// 1 = End A Core 2
+// 2 = End A Core 3
+// 3 = Neutral
 // ======================================================
 
+
 function getReading(
-    coreIndex
+    bCoreIndex
 ) {
+
+    const sourceIndex =
+        cableConfig.endBMap[
+            bCoreIndex
+        ];
+
+
+    // Neutral was directly bonded to armour at End A.
+    if (
+        sourceIndex === 3
+    ) {
+
+        return "0 Ω";
+
+    }
+
+
+    // Fault is stored against the true End A source core.
     if (
         cableConfig.faultCore
         ===
-        coreIndex
+        sourceIndex
     ) {
+
         return "OL";
+
     }
+
 
     return (
         session.assignments[
-            coreIndex
+            sourceIndex
         ]
         +
         " Ω"
     );
+
 }
 
+
+// ======================================================
+// Record panel
+// ======================================================
+
+
 function updateRecordPanel() {
+
     recordPanel.innerHTML =
-        "Core 1: "
+
+        "B Core A: "
         +
         (
             readings[0]
             ??
             "Not measured"
         )
+
         +
-        "<br>Core 2: "
+
+        "<br>B Core B: "
         +
         (
             readings[1]
             ??
             "Not measured"
         )
+
         +
-        "<br>Core 3: "
+
+        "<br>B Core C: "
         +
         (
             readings[2]
             ??
             "Not measured"
+        )
+
+        +
+
+        "<br>B Core D: "
+        +
+        (
+            readings[3]
+            ??
+            "Not measured"
         );
+
 }
+
 
 // ======================================================
 // Start AR
 // ======================================================
 
+
 startButton.addEventListener(
+
     "click",
+
     async () => {
+
         try {
+
             statusText.textContent =
                 "Starting AR...";
+
 
             startButton.disabled =
                 true;
 
+
             await mindarThree.start();
+
 
             startButton.style.display =
                 "none";
 
+
             statusText.textContent =
                 "Point camera at Cable End B tracking sheet";
 
+
             renderer.setAnimationLoop(
+
                 () => {
+
                     renderer.render(
                         scene,
                         camera
                     );
+
                 }
+
             );
+
         }
 
         catch (
             error
         ) {
+
             console.error(
                 error
             );
 
+
             statusText.textContent =
                 "AR startup failed";
 
+
             startButton.disabled =
                 false;
+
         }
+
     }
+
 );
 
+
 // ======================================================
-// Measure core
+// Measure B Core A/B/C/D
 // ======================================================
 
+
 measureButtons.forEach(
+
     button => {
+
         button.addEventListener(
+
             "click",
+
             () => {
+
                 if (
                     !session
                 ) {
+
                     return;
+
                 }
 
-                const coreIndex =
+
+                const bCoreIndex =
                     Number(
-                        button.dataset.core
+                        button.dataset.bCore
                     );
 
-                activeCore =
-                    coreIndex;
 
-                // Visually move the red probe lead.
-                connectRedProbeToCore(
-                    coreIndex
+                activeBCore =
+                    bCoreIndex;
+
+
+                connectRedProbeToBCore(
+                    bCoreIndex
                 );
+
 
                 const reading =
                     getReading(
-                        coreIndex
+                        bCoreIndex
                     );
 
+
                 readings[
-                    coreIndex
+                    bCoreIndex
                 ] =
                     reading;
 
+
                 meterDisplay.textContent =
                     reading;
+
 
                 button.classList.add(
                     "measured"
                 );
 
+
                 statusText.textContent =
-                    "Red probe connected to Core "
+                    "Red probe connected to B Core "
                     +
                     (
-                        coreIndex + 1
+                        ["A", "B", "C", "D"][
+                            bCoreIndex
+                        ]
                     );
 
+
                 updateRecordPanel();
+
             }
+
         );
+
     }
+
 );
+
 
 // ======================================================
 // Complete measurement
 // ======================================================
 
+
 finishButton.addEventListener(
+
     "click",
+
     () => {
+
         const allMeasured =
             readings.every(
                 value =>
                     value !== null
             );
 
+
         if (
             !allMeasured
         ) {
+
             statusText.textContent =
-                "Measure all three phase cores first";
+                "Measure B Core A, B, C and D first";
+
 
             return;
+
         }
+
 
         session.endBCompleted =
             true;
 
+
         session.readings =
             readings;
 
+
         localStorage.setItem(
+
             storageKey,
+
             JSON.stringify(
                 session
             )
+
         );
+
 
         if (
             readings.includes(
                 "OL"
             )
         ) {
+
             statusText.textContent =
                 "✓ MEASUREMENT COMPLETE — OPEN CIRCUIT DETECTED";
+
         }
 
         else {
+
             statusText.textContent =
                 "✓ MEASUREMENT COMPLETE";
+
         }
+
     }
+
 );
+
 
 // ======================================================
 // Return to End A
 // ======================================================
 
+
 restartButton.addEventListener(
+
     "click",
+
     () => {
+
         window.location.href =
             "./d04-end-a.html?set="
             +
             cableSet;
+
     }
+
 );
+
+
 </script>
+
+
 </body>
+
 </html>
