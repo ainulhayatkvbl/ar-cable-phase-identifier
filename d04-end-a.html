@@ -1793,44 +1793,81 @@ confirmButton.addEventListener(
 
     () => {
 
+        // Check all three phase cores are connected
         const completed =
             assignments.every(
-                value =>
-                    value !== null
+                value => value !== null
             );
 
 
-        if (
-            !completed
-        ) {
+        if (!completed) {
 
             statusText.textContent =
                 "Connect all three phase cores";
 
             return;
-
         }
 
 
-        if (
-            !neutralConnected
-        ) {
+        // Check Neutral → Armour
+        if (!neutralConnected) {
 
             statusText.textContent =
                 "Connect Neutral to Armour";
 
             return;
-
         }
 
 
+        // ==============================================
+        // Save End A results
+        // ==============================================
+
+        const sessionData = {
+
+            assignments: [
+                assignments[0],
+                assignments[1],
+                assignments[2]
+            ],
+
+            neutralConnected: true,
+
+            endACompleted: true
+
+        };
+
+
+        localStorage.setItem(
+
+            "cablePhaseSession",
+
+            JSON.stringify(
+                sessionData
+            )
+
+        );
+
+
         statusText.textContent =
-            "✓ END A COMPLETE — READY TO FOLLOW CABLE";
+            "✓ END A COMPLETE";
 
 
-        console.log(
-            "End A assignments:",
-            assignments
+        // ==============================================
+        // Continue to cable route
+        // ==============================================
+
+        setTimeout(
+
+            () => {
+
+                window.location.href =
+                    "./d05-route.html";
+
+            },
+
+            800
+
         );
 
     }
